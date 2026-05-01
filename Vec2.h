@@ -2,7 +2,9 @@
 
 #include <array>
 #include <cmath>
+#include <iostream>
 #include <type_traits>
+#include <concepts>
 
 
 template<typename T>
@@ -87,3 +89,49 @@ private:
 	std::array<T, 2> e{};
 };
 
+
+template<typename T>
+inline std::ostream& operator<<(std::ostream& out, const Vec2<T>& v) {
+	return out << v.x() << ' ' << v.y() << ' ';
+}
+
+template<typename T, typename U>
+inline Vec2<std::common_type_t<T, U>> operator+(const Vec2<T>& u, const Vec2<U>& v) {
+	return Vec2<std::common_type_t<T, U>>(u.x() + v.x(), u.y() + v.y());
+}
+
+template<typename T, typename U>
+inline Vec2<std::common_type_t<T, U>> operator-(const Vec2<T>& u, const Vec2<U>& v) {
+	return Vec2<std::common_type_t<T, U>>(u.x() - v.x(), u.y() - v.y());
+}
+
+template<typename T, typename U>
+inline Vec2<std::common_type_t<T, U>> operator*(const Vec2<T>& u, const Vec2<U>& v) {
+	return Vec2<std::common_type_t<T, U>>(u.x() * v.x(), u.y() * v.y());
+}
+
+template<typename T, typename U>
+inline Vec2<std::common_type_t<T, U>> operator*(const Vec2<T>& v, U t) {
+	return Vec2<std::common_type_t<T, U>>(v.x() * t, v.y() * t);
+}
+
+template<typename T, typename U>
+inline Vec2<std::common_type_t<T, U>> operator*(U t, const Vec2<T>& v) {
+	return Vec2<std::common_type_t<T, U>>(v.x() * t, v.y() * t);
+}
+
+template<typename T, typename U>
+inline Vec2<std::common_type_t<T, U>> operator/(const Vec2<T>& v, U t) {
+	return Vec2<std::common_type_t<T, U>>(v.x() / t, v.y() / t);
+}
+
+
+template<typename T, typename U>
+inline std::common_type_t<T, U> dot(const Vec2<T>& u, const Vec2<U>& v) {
+	return u.x() * v.x() + u.y() * v.y();
+}
+
+template<typename T>
+inline Vec2<T> unit_vector(const Vec2<T>& v) {
+	return v / v.length();
+}

@@ -23,9 +23,6 @@
     <ClCompile Include="Water-Slosh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Particle.cpp">
-      <Filter>Source Files\sim</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Vec2.h">

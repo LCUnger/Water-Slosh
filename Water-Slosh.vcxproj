@@ -127,7 +127,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Particle.cpp" />
     <ClCompile Include="Water-Slosh.cpp" />
   </ItemGroup>
   <ItemGroup>

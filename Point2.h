@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Vec2.h"
+
 template<typename T>
 class Point2
 {
@@ -12,6 +14,13 @@ public:
 
 	T operator[](int i) const { return e[i]; }
 	T& operator[](int i) { return e[i]; }
+
+	Point2<T>& operator+=(const Vec2<T>& v)
+	{
+		e[0] += v.x();
+		e[1] += v.y();
+		return *this;
+	}
 
 private:
 	std::array<T, 2> e{};

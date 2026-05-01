@@ -10,8 +10,9 @@ public:
 	Particle() : pos(0, 0), velocity(0, 0) {}
 	Particle(float x, float y, float v_x, float v_y) : pos(x, y), velocity(v_x, v_y) {}
 
-	void update(float dt)
-	{
+	void update(float dt, const Vec2<float>& acceleration)
+	{	
+		velocity += acceleration * dt;
 		pos += velocity * dt;
 	}
 

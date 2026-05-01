@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="Water-Slosh.vcxproj" />
+  <Project Path="Water-Slosh.vcxproj" Id="b5ea0926-dd70-42cb-b2e7-06d4ff7e1085" />
 </Solution>

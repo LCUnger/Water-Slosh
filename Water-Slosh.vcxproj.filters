@@ -28,5 +28,8 @@
     <ClInclude Include="Vec2.h">
       <Filter>Source Files\sim</Filter>
     </ClInclude>
+    <ClInclude Include="Point2.h">
+      <Filter>Source Files\sim</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -132,6 +132,7 @@
     <ClCompile Include="Water-Slosh.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FieldTypes.h" />
     <ClInclude Include="FluidGrid.h" />
     <ClInclude Include="Grid2D.h" />
     <ClInclude Include="Particle.h" />

@@ -18,13 +18,19 @@
     <Filter Include="Source Files\input">
       <UniqueIdentifier>{54363344-9dcc-467a-a721-bbf2fd691f6e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\core">
+      <UniqueIdentifier>{8d032762-d51f-4a67-b726-7799ca81f007}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Water-Slosh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FluidGrid.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\sim</Filter>
+    </ClCompile>
+    <ClCompile Include="PointVecOps.h">
+      <Filter>Source Files\core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -34,15 +40,26 @@
     <ClInclude Include="Point2.h">
       <Filter>Source Files\sim</Filter>
     </ClInclude>
-    <ClInclude Include="Point2Vec2Ops.h">
-      <Filter>Source Files\sim</Filter>
-    </ClInclude>
     <ClInclude Include="Particle.h">
       <Filter>Source Files\sim</Filter>
     </ClInclude>
     <ClInclude Include="Grid2D.h">
       <Filter>Source Files\sim</Filter>
     </ClInclude>
-    <ClInclude Include="FluidGrid.h" />
+    <ClInclude Include="FluidGrid.h">
+      <Filter>Source Files\sim</Filter>
+    </ClInclude>
+    <ClInclude Include="FieldTypes.h">
+      <Filter>Source Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="ScalarField.h">
+      <Filter>Source Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="Point.h">
+      <Filter>Source Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="Vec.h">
+      <Filter>Source Files\core</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

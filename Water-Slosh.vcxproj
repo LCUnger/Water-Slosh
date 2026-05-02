@@ -127,9 +127,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="FluidGrid.cpp" />
     <ClCompile Include="Water-Slosh.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FluidGrid.h" />
     <ClInclude Include="Grid2D.h" />
     <ClInclude Include="Particle.h" />
     <ClInclude Include="Point2.h" />

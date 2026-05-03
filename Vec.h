@@ -109,6 +109,14 @@ public:
         return true;
     }
 
+	Vec& fill(const T value)
+    {
+        for (auto& component : e) {
+            component = value;
+        }
+        return *this;
+    }
+
     constexpr auto begin() { return e.begin(); }
     constexpr auto end() { return e.end(); }
     constexpr auto begin() const { return e.begin(); }

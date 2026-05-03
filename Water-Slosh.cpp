@@ -3,6 +3,7 @@
 #include <cstdint>
 
 #include "FieldTypes.h"
+#include "Tensor.h"
 
 int main()
 {

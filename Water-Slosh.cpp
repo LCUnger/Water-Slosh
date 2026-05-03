@@ -2,6 +2,8 @@
 #include <cmath>
 #include <cstdint>
 
+#include "FieldTypes.h"
+
 int main()
 {
     const unsigned int width = 800;

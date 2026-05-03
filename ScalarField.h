@@ -38,9 +38,25 @@ public:
 		return T{};
 	}
 
+	Point<T, dimensions> worldToField(const Point<T, dimensions>& world_position) const
+	{
+		return world_position - FieldType::offset;
+	}
+
+	Point<T, dimensions> fieldToWorld(const Point<T, dimensions>& field_position) const
+	{
+		return field_position + FieldType::offset;
+	}
+
 
 private:
 	DataType data;
+
+	T interpolate(const Point<T, dimensions>& field_position) const
+	{
+		(void)field_position;
+		return T{};
+	}
 
 };
 }

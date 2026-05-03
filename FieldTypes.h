@@ -1,13 +1,14 @@
 #pragma once
 
 #include "Vec.h"
+#include <array>
 
 namespace toolbox
 {
 template<typename T, int dimensions>
 struct CellCentered {
  inline static constexpr Vec<T, dimensions> offset{ static_cast<T>(0.5) };
- inline static constexpr Vec<int, dimensions> index_extend{};
+ inline static constexpr std::array<int, dimensions> index_extend{ 0 };
 
 };
 
@@ -21,8 +22,8 @@ struct FaceCentered {
 		return value;
 	}();
 
-    inline static constexpr Vec<int, dimensions> index_extend = [] {
-        Vec<int, dimensions> value{ 0 };
+    inline static constexpr std::array<int, dimensions> index_extend = [] {
+        std::array<int, dimensions> value{ 0 };
         value[axis] = 1;
 		return value;
 		}();

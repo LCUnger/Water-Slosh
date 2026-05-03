@@ -2,6 +2,8 @@
 
 #include "Vec.h"
 
+namespace toolbox
+{
 struct CellCentered {
 	template<typename T, int Dimensions>
     inline static constexpr Vec<T, Dimensions> offset = [] {
@@ -13,9 +15,9 @@ struct CellCentered {
 	}();
 };
 
-template<typename T, int Axis>
+template<int Axis>
 struct FaceCentered {
-	template<int Dimensions>
+	template<typename T, int Dimensions>
     inline static constexpr Vec<T, Dimensions> offset = [] {
 		static_assert(Axis >= 0 && Axis < Dimensions, "axis out of range");
 		Vec<T, Dimensions> value{};
@@ -26,3 +28,4 @@ struct FaceCentered {
 		return value;
 	}();
 };
+}

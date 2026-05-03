@@ -2,6 +2,8 @@
 
 #include "Vec.h"
 
+namespace toolbox
+{
 template<typename T, int Dimensions>
 class Point
 {
@@ -38,3 +40,4 @@ public:
 private:
     std::array<T, Dimensions> e{};
 };
+}

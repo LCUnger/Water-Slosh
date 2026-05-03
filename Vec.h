@@ -6,6 +6,8 @@
 #include <iostream>
 #include <type_traits>
 
+namespace toolbox
+{
 template<typename T, int Dimensions>
 class Vec
 {
@@ -201,4 +203,5 @@ template<typename T, int Dimensions>
 inline Vec<T, Dimensions> unit_vector(const Vec<T, Dimensions>& v)
 {
     return v / v.length();
+}
 }

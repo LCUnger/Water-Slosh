@@ -5,14 +5,14 @@
 
 namespace toolbox
 {
-template<typename T, int dimensions>
+template<typename T, std::size_t dimensions>
 struct CellCentered {
  inline static constexpr Vec<T, dimensions> offset{ static_cast<T>(0.5) };
  inline static constexpr std::array<int, dimensions> index_extend{ 0 };
 
 };
 
-template<typename T, int dimensions, int axis>
+template<typename T, std::size_t dimensions, std::size_t axis>
 struct FaceCentered {
  static_assert(axis >= 0 && axis < dimensions, "axis out of range");
 	

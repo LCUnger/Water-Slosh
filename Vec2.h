@@ -2,4 +2,4 @@
 
 #include "Vec.h"
 
-using Vec2 = Vec<double, 2>;
+using Vec2 = toolbox::Vec<double, 2>;

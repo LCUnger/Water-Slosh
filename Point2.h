@@ -2,5 +2,4 @@
 
 #include "Point.h"
 
-using Point2 = Point<double, 2>;
-
+using Point2 = toolbox::Point<double, 2>;

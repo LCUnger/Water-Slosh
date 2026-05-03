@@ -8,62 +8,62 @@
 
 namespace toolbox
 {
-template<typename T, int Dimensions>
+template<typename T, int dimensions>
 class Vec
 {
 public:
     constexpr Vec() = default;
 
     template<typename... Args>
-        requires (sizeof...(Args) == Dimensions && (std::convertible_to<Args, T> && ...))
-    constexpr Vec(Args... args) : e{ static_cast<T>(args)... } {}
+        requires (sizeof...(Args) == dimensions && (std::convertible_to<Args, T> && ...))
+    constexpr Vec(Args... args) : elements{ static_cast<T>(args)... } {}
 
-    constexpr explicit Vec(const std::array<T, Dimensions>& values) : e(values) {}
+    constexpr explicit Vec(const std::array<T, dimensions>& values) : elements(values) {}
 
-    constexpr T at(int i) const { return e[i]; }
+    constexpr T at(int index) const { return elements[index]; }
 
-    constexpr const T& operator[](int i) const { return e[i]; }
-    constexpr T& operator[](int i) { return e[i]; }
+    constexpr const T& operator[](int index) const { return elements[index]; }
+    constexpr T& operator[](int index) { return elements[index]; }
 
     constexpr Vec operator-() const
     {
         Vec result;
-        for (int i = 0; i < Dimensions; ++i) {
-            result[i] = -e[i];
+        for (int index = 0; index < dimensions; ++index) {
+            result[index] = -elements[index];
         }
         return result;
     }
 
-    constexpr Vec& operator+=(const Vec& v)
+    constexpr Vec& operator+=(const Vec& vector)
     {
-        for (int i = 0; i < Dimensions; ++i) {
-            e[i] += v.e[i];
+        for (int index = 0; index < dimensions; ++index) {
+            elements[index] += vector.elements[index];
         }
         return *this;
     }
 
-    constexpr Vec& operator-=(const Vec& v)
+    constexpr Vec& operator-=(const Vec& vector)
     {
-        for (int i = 0; i < Dimensions; ++i) {
-            e[i] -= v.e[i];
-        }
-        return *this;
-    }
-
-    template<typename U>
-    constexpr Vec& operator*=(const U t)
-    {
-        for (auto& component : e) {
-            component *= static_cast<T>(t);
+        for (int index = 0; index < dimensions; ++index) {
+            elements[index] -= vector.elements[index];
         }
         return *this;
     }
 
     template<typename U>
-    constexpr Vec& operator/=(const U t)
+    constexpr Vec& operator*=(const U scalar)
     {
-        for (auto& component : e) {
-            component /= static_cast<T>(t);
+        for (auto& component : elements) {
+            component *= static_cast<T>(scalar);
+        }
+        return *this;
+    }
+
+    template<typename U>
+    constexpr Vec& operator/=(const U scalar)
+    {
+        for (auto& component : elements) {
+            component /= static_cast<T>(scalar);
         }
         return *this;
     }
@@ -71,7 +71,7 @@ public:
     T length_squared() const requires std::floating_point<T>
     {
         T sum{};
-        for (const auto& component : e) {
+        for (const auto& component : elements) {
             sum += component * component;
         }
         return sum;
@@ -101,7 +101,7 @@ public:
     bool near_zero() const requires std::floating_point<T>
     {
         const T s = static_cast<T>(1e-8);
-        for (const auto& component : e) {
+        for (const auto& component : elements) {
             if (std::fabs(component) >= s) {
                 return false;
             }
@@ -111,105 +111,105 @@ public:
 
 	Vec& fill(const T value)
     {
-        for (auto& component : e) {
+        for (auto& component : elements) {
             component = value;
         }
         return *this;
     }
 
-    constexpr auto begin() { return e.begin(); }
-    constexpr auto end() { return e.end(); }
-    constexpr auto begin() const { return e.begin(); }
-    constexpr auto end() const { return e.end(); }
+    constexpr auto begin() { return elements.begin(); }
+    constexpr auto end() { return elements.end(); }
+    constexpr auto begin() const { return elements.begin(); }
+    constexpr auto end() const { return elements.end(); }
 
-    constexpr auto cbegin() const { return e.cbegin(); }
-    constexpr auto cend() const { return e.cend(); }
+    constexpr auto cbegin() const { return elements.cbegin(); }
+    constexpr auto cend() const { return elements.cend(); }
 
 private:
-    std::array<T, Dimensions> e{};
+    std::array<T, dimensions> elements{};
 };
 
-template<typename T, int Dimensions>
-inline std::ostream& operator<<(std::ostream& out, const Vec<T, Dimensions>& v)
+template<typename T, int dimensions>
+inline std::ostream& operator<<(std::ostream& out, const Vec<T, dimensions>& vector)
 {
-    for (int i = 0; i < Dimensions; ++i) {
-        if (i > 0) {
+    for (int index = 0; index < dimensions; ++index) {
+        if (index > 0) {
             out << ' ';
         }
-        out << v[i];
+        out << vector[index];
     }
     return out;
 }
 
-template<typename T, typename U, int Dimensions>
-inline Vec<std::common_type_t<T, U>, Dimensions> operator+(const Vec<T, Dimensions>& u, const Vec<U, Dimensions>& v)
+template<typename T, typename U, int dimensions>
+inline Vec<std::common_type_t<T, U>, dimensions> operator+(const Vec<T, dimensions>& left, const Vec<U, dimensions>& right)
 {
-    Vec<std::common_type_t<T, U>, Dimensions> result;
-    for (int i = 0; i < Dimensions; ++i) {
-        result[i] = u[i] + v[i];
+    Vec<std::common_type_t<T, U>, dimensions> result;
+    for (int index = 0; index < dimensions; ++index) {
+        result[index] = left[index] + right[index];
     }
     return result;
 }
 
-template<typename T, typename U, int Dimensions>
-inline Vec<std::common_type_t<T, U>, Dimensions> operator-(const Vec<T, Dimensions>& u, const Vec<U, Dimensions>& v)
+template<typename T, typename U, int dimensions>
+inline Vec<std::common_type_t<T, U>, dimensions> operator-(const Vec<T, dimensions>& left, const Vec<U, dimensions>& right)
 {
-    Vec<std::common_type_t<T, U>, Dimensions> result;
-    for (int i = 0; i < Dimensions; ++i) {
-        result[i] = u[i] - v[i];
+    Vec<std::common_type_t<T, U>, dimensions> result;
+    for (int index = 0; index < dimensions; ++index) {
+        result[index] = left[index] - right[index];
     }
     return result;
 }
 
-template<typename T, typename U, int Dimensions>
-inline Vec<std::common_type_t<T, U>, Dimensions> operator*(const Vec<T, Dimensions>& u, const Vec<U, Dimensions>& v)
+template<typename T, typename U, int dimensions>
+inline Vec<std::common_type_t<T, U>, dimensions> operator*(const Vec<T, dimensions>& left, const Vec<U, dimensions>& right)
 {
-    Vec<std::common_type_t<T, U>, Dimensions> result;
-    for (int i = 0; i < Dimensions; ++i) {
-        result[i] = u[i] * v[i];
+    Vec<std::common_type_t<T, U>, dimensions> result;
+    for (int index = 0; index < dimensions; ++index) {
+        result[index] = left[index] * right[index];
     }
     return result;
 }
 
-template<typename T, typename U, int Dimensions>
-inline Vec<std::common_type_t<T, U>, Dimensions> operator*(const Vec<T, Dimensions>& v, U t)
+template<typename T, typename U, int dimensions>
+inline Vec<std::common_type_t<T, U>, dimensions> operator*(const Vec<T, dimensions>& vector, U scalar)
 {
-    Vec<std::common_type_t<T, U>, Dimensions> result;
-    for (int i = 0; i < Dimensions; ++i) {
-        result[i] = v[i] * t;
+    Vec<std::common_type_t<T, U>, dimensions> result;
+    for (int index = 0; index < dimensions; ++index) {
+        result[index] = vector[index] * scalar;
     }
     return result;
 }
 
-template<typename T, typename U, int Dimensions>
-inline Vec<std::common_type_t<T, U>, Dimensions> operator*(U t, const Vec<T, Dimensions>& v)
+template<typename T, typename U, int dimensions>
+inline Vec<std::common_type_t<T, U>, dimensions> operator*(U scalar, const Vec<T, dimensions>& vector)
 {
-    return v * t;
+    return vector * scalar;
 }
 
-template<typename T, typename U, int Dimensions>
-inline Vec<std::common_type_t<T, U>, Dimensions> operator/(const Vec<T, Dimensions>& v, U t)
+template<typename T, typename U, int dimensions>
+inline Vec<std::common_type_t<T, U>, dimensions> operator/(const Vec<T, dimensions>& vector, U scalar)
 {
-    Vec<std::common_type_t<T, U>, Dimensions> result;
-    for (int i = 0; i < Dimensions; ++i) {
-        result[i] = v[i] / t;
+    Vec<std::common_type_t<T, U>, dimensions> result;
+    for (int index = 0; index < dimensions; ++index) {
+        result[index] = vector[index] / scalar;
     }
     return result;
 }
 
-template<typename T, typename U, int Dimensions>
-inline std::common_type_t<T, U> dot(const Vec<T, Dimensions>& u, const Vec<U, Dimensions>& v)
+template<typename T, typename U, int dimensions>
+inline std::common_type_t<T, U> dot(const Vec<T, dimensions>& left, const Vec<U, dimensions>& right)
 {
     std::common_type_t<T, U> result{};
-    for (int i = 0; i < Dimensions; ++i) {
-        result += u[i] * v[i];
+    for (int index = 0; index < dimensions; ++index) {
+        result += left[index] * right[index];
     }
     return result;
 }
 
-template<typename T, int Dimensions>
-inline Vec<T, Dimensions> unit_vector(const Vec<T, Dimensions>& v)
+template<typename T, int dimensions>
+inline Vec<T, dimensions> unit_vector(const Vec<T, dimensions>& vector)
 {
-    return v / v.length();
+    return vector / vector.length();
 }
 }

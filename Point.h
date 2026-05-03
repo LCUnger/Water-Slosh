@@ -4,40 +4,40 @@
 
 namespace toolbox
 {
-template<typename T, int Dimensions>
+template<typename T, int dimensions>
 class Point
 {
 public:
     constexpr Point() = default;
 
     template<typename... Args>
-        requires (sizeof...(Args) == Dimensions && (std::convertible_to<Args, T> && ...))
-    constexpr Point(Args... args) : e{ static_cast<T>(args)... } {}
+        requires (sizeof...(Args) == dimensions && (std::convertible_to<Args, T> && ...))
+    constexpr Point(Args... args) : elements{ static_cast<T>(args)... } {}
 
-    constexpr explicit Point(const std::array<T, Dimensions>& values) : e(values) {}
+    constexpr explicit Point(const std::array<T, dimensions>& values) : elements(values) {}
 
-    constexpr T at(int i) const { return e[i]; }
+    constexpr T at(int index) const { return elements[index]; }
 
-    constexpr const T& operator[](int i) const { return e[i]; }
-    constexpr T& operator[](int i) { return e[i]; }
+    constexpr const T& operator[](int index) const { return elements[index]; }
+    constexpr T& operator[](int index) { return elements[index]; }
 
-    constexpr Point& operator+=(const Vec<T, Dimensions>& v)
+    constexpr Point& operator+=(const Vec<T, dimensions>& vector)
     {
-        for (int i = 0; i < Dimensions; ++i) {
-            e[i] += v[i];
+        for (int index = 0; index < dimensions; ++index) {
+            elements[index] += vector[index];
         }
         return *this;
     }
 
-    constexpr auto begin() { return e.begin(); }
-    constexpr auto end() { return e.end(); }
-    constexpr auto begin() const { return e.begin(); }
-    constexpr auto end() const { return e.end(); }
+    constexpr auto begin() { return elements.begin(); }
+    constexpr auto end() { return elements.end(); }
+    constexpr auto begin() const { return elements.begin(); }
+    constexpr auto end() const { return elements.end(); }
 
-    constexpr auto cbegin() const { return e.cbegin(); }
-    constexpr auto cend() const { return e.cend(); }
+    constexpr auto cbegin() const { return elements.cbegin(); }
+    constexpr auto cend() const { return elements.cend(); }
 
 private:
-    std::array<T, Dimensions> e{};
+    std::array<T, dimensions> elements{};
 };
 }

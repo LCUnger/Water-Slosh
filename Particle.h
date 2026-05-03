@@ -2,25 +2,25 @@
 
 #include "Point2.h"
 #include "Vec2.h"
-#include "Point2Vec2Ops.h"
+#include "PointVecOps.h"
 
 class Particle
 {
 public:
-    Particle() : pos(0, 0), velocity(0, 0) {}
-    Particle(float x, float y, float v_x, float v_y) : pos(x, y), velocity(v_x, v_y) {}
+    Particle() : position{}, velocity{} {}
+    Particle(float position_x, float position_y, float velocity_x, float velocity_y) : position{ position_x, position_y }, velocity{ velocity_x, velocity_y } {}
 
 
     /* Integrate / update the particle's position and velocity over time dt, given an acceleration.
     Using semi-implicit Euler integration method. */
-    void integrate(float dt, const Vec2<float>& acceleration)
+    void integrate(float dt, const Vec2& acceleration)
     {	
         velocity += acceleration * dt;
-        pos += velocity * dt;
+        position += velocity * dt;
     }
 
 
 private:
-    Point2<float> pos{};
-    Vec2<float> velocity{};
+    Point2 position{};
+    Vec2 velocity{};
 };

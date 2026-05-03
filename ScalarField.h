@@ -6,14 +6,16 @@
 
 namespace toolbox
 {
-template<typename T, int Dimensions, typename FieldType>
+template<typename T, int dimensions, typename FieldType>
 class ScalarField
 {
 public:
 	
 
-    T sample(const Point<T, Dimensions>& world_position) const {
-		constexpr Point<T, Dimensions> field_position = world_position - FieldType::template offset<T, Dimensions>;
+    T sample(const Point<T, dimensions>& world_position) const {
+     const auto field_position = world_position - FieldType::offset;
+		(void)field_position;
+		return T{};
 	}
 
 

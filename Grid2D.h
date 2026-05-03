@@ -17,8 +17,8 @@ public:
 	Grid2D(int width, int height, GridLocation location) : width(width), height(height), location(location) {}
 
 
-	int getWidth() const { return width; }
-	int getHeight() const { return height; }
+  int get_width() const { return width; }
+	int get_height() const { return height; }
 
 
 private:

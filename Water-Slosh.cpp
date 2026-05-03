@@ -18,27 +18,27 @@ int main()
     {
         for (unsigned int x = 0; x < width; ++x)
         {
-            float u = static_cast<float>(x) / static_cast<float>(width);
-            float v = static_cast<float>(y) / static_cast<float>(height);
+            float texture_u = static_cast<float>(x) / static_cast<float>(width);
+            float texture_v = static_cast<float>(y) / static_cast<float>(height);
 
-            std::uint8_t r = static_cast<std::uint8_t>(255 * u);
-            std::uint8_t g = static_cast<std::uint8_t>(255 * v);
-            std::uint8_t b = 100;
+            std::uint8_t red = static_cast<std::uint8_t>(255 * texture_u);
+            std::uint8_t green = static_cast<std::uint8_t>(255 * texture_v);
+            std::uint8_t blue = 100;
 
-            float cx = width / 2.0f;
-            float cy = height / 2.0f;
-            float dx = static_cast<float>(x) - cx;
-            float dy = static_cast<float>(y) - cy;
-            float dist = std::sqrt(dx * dx + dy * dy);
+            float center_x = width / 2.0f;
+            float center_y = height / 2.0f;
+            float delta_x = static_cast<float>(x) - center_x;
+            float delta_y = static_cast<float>(y) - center_y;
+            float distance = std::sqrt(delta_x * delta_x + delta_y * delta_y);
 
-            if (dist < 100.0f)
+            if (distance < 100.0f)
             {
-                r = 255;
-                g = 50;
-                b = 50;
+                red = 255;
+                green = 50;
+                blue = 50;
             }
 
-            image.setPixel({ x, y }, sf::Color(r, g, b));
+            image.setPixel({ x, y }, sf::Color(red, green, blue));
         }
     }
 

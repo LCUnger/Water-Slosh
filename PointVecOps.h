@@ -5,32 +5,32 @@
 
 namespace toolbox
 {
-template<typename T, int Dimensions>
-inline Point<T, Dimensions> operator+(const Point<T, Dimensions>& p, const Vec<T, Dimensions>& v)
+template<typename T, int dimensions>
+inline Point<T, dimensions> operator+(const Point<T, dimensions>& point, const Vec<T, dimensions>& vector)
 {
-    Point<T, Dimensions> result;
-    for (int i = 0; i < Dimensions; ++i) {
-        result[i] = p[i] + v[i];
+    Point<T, dimensions> result;
+    for (int index = 0; index < dimensions; ++index) {
+        result[index] = point[index] + vector[index];
     }
     return result;
 }
 
-template<typename T, int Dimensions>
-inline Point<T, Dimensions> operator-(const Point<T, Dimensions>& p, const Vec<T, Dimensions>& v)
+template<typename T, int dimensions>
+inline Point<T, dimensions> operator-(const Point<T, dimensions>& point, const Vec<T, dimensions>& vector)
 {
-    Point<T, Dimensions> result;
-    for (int i = 0; i < Dimensions; ++i) {
-        result[i] = p[i] - v[i];
+    Point<T, dimensions> result;
+    for (int index = 0; index < dimensions; ++index) {
+        result[index] = point[index] - vector[index];
     }
     return result;
 }
 
-template<typename T, int Dimensions>
-inline Vec<T, Dimensions> operator-(const Point<T, Dimensions>& p1, const Point<T, Dimensions>& p2)
+template<typename T, int dimensions>
+inline Vec<T, dimensions> operator-(const Point<T, dimensions>& left, const Point<T, dimensions>& right)
 {
-    Vec<T, Dimensions> result;
-    for (int i = 0; i < Dimensions; ++i) {
-        result[i] = p1[i] - p2[i];
+    Vec<T, dimensions> result;
+    for (int index = 0; index < dimensions; ++index) {
+        result[index] = left[index] - right[index];
     }
     return result;
 }

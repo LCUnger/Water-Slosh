@@ -62,4 +62,7 @@
       <Filter>Source Files\core</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include=".github\copilot-instructions.md" />
+  </ItemGroup>
 </Project>

@@ -139,6 +139,7 @@
     <ClInclude Include="Point.h" />
     <ClInclude Include="Point2.h" />
     <ClInclude Include="ScalarField.h" />
+    <ClInclude Include="Tensor.h" />
     <ClInclude Include="Vec.h" />
     <ClInclude Include="Vec2.h" />
   </ItemGroup>

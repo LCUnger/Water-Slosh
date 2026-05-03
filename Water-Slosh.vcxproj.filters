@@ -61,6 +61,9 @@
     <ClInclude Include="Vec.h">
       <Filter>Source Files\core</Filter>
     </ClInclude>
+    <ClInclude Include="Tensor.h">
+      <Filter>Source Files\core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include=".github\copilot-instructions.md" />

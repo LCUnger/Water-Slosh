@@ -1,0 +1,149 @@
+#pragma once
+
+#include <array>
+#include <concepts>
+#include <cstddef>
+#include <type_traits>
+
+template<typename T, std::size_t Rank, std::size_t... Extents>
+class Tensor
+{
+    static_assert(Rank == sizeof...(Extents));
+    static constexpr std::array<std::size_t, Rank> extents{ Extents... };
+    static constexpr std::size_t size = (Extents * ...);
+
+public:
+    constexpr Tensor() = default;
+
+    template<typename... Args>
+        requires (sizeof...(Args) == size && (std::convertible_to<Args, T> && ...))
+    constexpr Tensor(Args... args) : elements{ static_cast<T>(args)... } {}
+
+    constexpr Tensor operator-() const
+    {
+        Tensor result;
+        for (std::size_t index = 0; index < size; ++index) {
+            result[index] = -elements[index];
+        }
+        return result;
+    }
+
+    constexpr Tensor& operator+=(const Tensor& other)
+    {
+        for (std::size_t index = 0; index < size; ++index) {
+            elements[index] += other.elements[index];
+        }
+        return *this;
+    }
+
+    constexpr Tensor& operator-=(const Tensor& other)
+    {
+        for (std::size_t index = 0; index < size; ++index) {
+            elements[index] -= other.elements[index];
+        }
+        return *this;
+    }
+
+    template<typename U>
+    constexpr Tensor& operator*=(const U scalar)
+    {
+        for (auto& component : elements) {
+            component *= static_cast<T>(scalar);
+        }
+        return *this;
+    }
+
+    template<typename U>
+    constexpr Tensor& operator/=(const U scalar)
+    {
+        for (auto& component : elements) {
+            component /= static_cast<T>(scalar);
+        }
+        return *this;
+    }
+
+    constexpr T& operator[](std::size_t index) { return elements[index]; }
+    constexpr const T& operator[](std::size_t index) const { return elements[index]; }
+
+    template<typename... Indices>
+    constexpr T& at(Indices... indices)
+        requires (sizeof...(Indices) == Rank)
+    {
+        return elements[flattenIndices(indices...)];
+    }
+
+    template<typename... Indices>
+    constexpr const T& at(Indices... indices) const
+        requires (sizeof...(Indices) == Rank)
+    {
+        return elements[flattenIndices(indices...)];
+    }
+
+private:
+    std::array<T, size> elements{};
+
+    template<typename... Indices>
+    static constexpr std::size_t flattenIndices(Indices... indices)
+    {
+        std::array<std::size_t, Rank> idx{ static_cast<std::size_t>(indices)... };
+        std::size_t offset = 0;
+        std::size_t stride = 1;
+
+        for (std::size_t i = Rank; i-- > 0;) {
+            offset += idx[i] * stride;
+            stride *= extents[i];
+        }
+
+        return offset;
+    }
+};
+
+template<typename T, typename U, std::size_t Rank, std::size_t... Extents>
+inline Tensor<std::common_type_t<T, U>, Rank, Extents...> operator+(const Tensor<T, Rank, Extents...>& left, const Tensor<U, Rank, Extents...>& right)
+{
+    constexpr std::size_t tensor_size = (Extents * ...);
+    Tensor<std::common_type_t<T, U>, Rank, Extents...> result;
+    for (std::size_t index = 0; index < tensor_size; ++index) {
+        result[index] = left[index] + right[index];
+    }
+    return result;
+}
+
+template<typename T, typename U, std::size_t Rank, std::size_t... Extents>
+inline Tensor<std::common_type_t<T, U>, Rank, Extents...> operator-(const Tensor<T, Rank, Extents...>& left, const Tensor<U, Rank, Extents...>& right)
+{
+    constexpr std::size_t tensor_size = (Extents * ...);
+    Tensor<std::common_type_t<T, U>, Rank, Extents...> result;
+    for (std::size_t index = 0; index < tensor_size; ++index) {
+        result[index] = left[index] - right[index];
+    }
+    return result;
+}
+
+template<typename T, typename U, std::size_t Rank, std::size_t... Extents>
+inline Tensor<std::common_type_t<T, U>, Rank, Extents...> operator*(const Tensor<T, Rank, Extents...>& tensor, U scalar)
+{
+    constexpr std::size_t tensor_size = (Extents * ...);
+    Tensor<std::common_type_t<T, U>, Rank, Extents...> result;
+    for (std::size_t index = 0; index < tensor_size; ++index) {
+        result[index] = tensor[index] * scalar;
+    }
+    return result;
+}
+
+template<typename T, typename U, std::size_t Rank, std::size_t... Extents>
+inline Tensor<std::common_type_t<T, U>, Rank, Extents...> operator*(U scalar, const Tensor<T, Rank, Extents...>& tensor)
+{
+    return tensor * scalar;
+}
+
+template<typename T, typename U, std::size_t Rank, std::size_t... Extents>
+inline Tensor<std::common_type_t<T, U>, Rank, Extents...> operator/(const Tensor<T, Rank, Extents...>& tensor, U scalar)
+{
+    constexpr std::size_t tensor_size = (Extents * ...);
+    Tensor<std::common_type_t<T, U>, Rank, Extents...> result;
+    for (std::size_t index = 0; index < tensor_size; ++index) {
+        result[index] = tensor[index] / scalar;
+    }
+    return result;
+}

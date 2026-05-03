@@ -13,12 +13,12 @@ public:
 	
 
     T sample(const Point<T, Dimensions>& world_position) const {
-		auto field_position = world_position - FieldType::template offset<T, Dimensions>;
-
-
+		constexpr Point<T, Dimensions> field_position = world_position - FieldType::template offset<T, Dimensions>;
 	}
 
 
 private:
+
+
 };
 }

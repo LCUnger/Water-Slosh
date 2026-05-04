@@ -8,7 +8,7 @@ namespace toolbox
 template<typename T, std::size_t dimensions>
 struct CellCentered {
  inline static constexpr Vec<T, dimensions> offset{ static_cast<T>(0.5) };
- inline static constexpr std::array<std::size_t, dimensions> index_extend{ 0 };
+ inline static constexpr Vec<std::size_t, dimensions> index_extend{ 0 };
 
 };
 
@@ -22,8 +22,8 @@ struct FaceCentered {
 		return value;
 	}();
 
-    inline static constexpr std::array<std::size_t, dimensions> index_extend = [] {
-        std::array<std::size_t, dimensions> value{ 0 };
+    inline static constexpr Vec<std::size_t, dimensions> index_extend = [] {
+        Vec<std::size_t, dimensions> value{ 0 };
         value[axis] = 1;
 		return value;
 		}();

@@ -10,286 +10,295 @@
 
 namespace toolbox
 {
-template<typename T, std::size_t Rank>
-class ArrayND
-{
-public:
-    using ValueType = T;
-    using ShapeType = std::array<std::size_t, Rank>;
-    using IndexType = std::array<std::size_t, Rank>;
-
-    ArrayND() = default;
-
-    explicit ArrayND(ShapeType shape, std::size_t padding_width = 0)
-        : shape_(shape),
-          padding_width_(padding_width),
-          elements_(totalSizeFromShape(shape, padding_width))
+    template<typename T, std::size_t Rank>
+    class ArrayND
     {
-        computeStrides();
-    }
+    public:
+        using ValueType = T;
+        using ShapeType = std::array<std::size_t, Rank>;
+        using IndexType = std::array<std::size_t, Rank>;
 
-    ArrayND(ShapeType shape, const T& initial_value, std::size_t padding_width = 0)
-        : shape_(shape),
-          padding_width_(padding_width),
-          elements_(totalSizeFromShape(shape, padding_width), initial_value)
+        ArrayND() = default;
+
+        explicit ArrayND(ShapeType shape, std::size_t padding_width = 0)
+            : shape_(shape),
+            padding_width_(padding_width),
+            elements_(totalSizeFromShape(shape, padding_width))
+        {
+            computeStrides();
+        }
+
+        ArrayND(ShapeType shape, const T& initial_value, std::size_t padding_width = 0)
+            : shape_(shape),
+            padding_width_(padding_width),
+            elements_(totalSizeFromShape(shape, padding_width), initial_value)
+        {
+            computeStrides();
+        }
+
+        T& operator[](std::size_t flat_index)
+        {
+            return elements_[flat_index];
+        }
+
+        const T& operator[](std::size_t flat_index) const
+        {
+            return elements_[flat_index];
+        }
+
+        T& at(const IndexType& index)
+        {
+            return elements_.at(flattenIndex(index));
+        }
+
+        const T& at(const IndexType& index) const
+        {
+            return elements_.at(flattenIndex(index));
+        }
+
+        template<typename... Indices>
+            requires (sizeof...(Indices) == Rank)
+        T& at(Indices... indices)
+        {
+            return at(IndexType{ static_cast<std::size_t>(indices)... });
+        }
+
+        template<typename... Indices>
+            requires (sizeof...(Indices) == Rank)
+        const T& at(Indices... indices) const
+        {
+            return at(IndexType{ static_cast<std::size_t>(indices)... });
+        }
+
+        template<typename... Indices>
+            requires (sizeof...(Indices) == Rank)
+        T& operator()(Indices... indices)
+        {
+            return (*this)[IndexType{ static_cast<std::size_t>(indices)... }];
+        }
+
+        template<typename... Indices>
+            requires (sizeof...(Indices) == Rank)
+        const T& operator()(Indices... indices) const
+        {
+            return (*this)[IndexType{ static_cast<std::size_t>(indices)... }];
+        }
+
+        const ShapeType& shape() const
+        {
+            return shape_;
+        }
+
+        const ShapeType& paddedShape() const
+        {
+			ShapeType padded_shape{};
+			for (std::size_t axis = 0; axis < Rank; ++axis) {
+                padded_shape[axis] = shape_[axis] + 2 * padding_width_;
+            }
+            return padded_shape;
+		}
+
+        const ShapeType& strides() const
+        {
+            return strides_;
+        }
+
+        std::size_t paddingWidth() const
+        {
+            return padding_width_;
+        }
+
+        std::size_t size() const
+        {
+            return elements_.size();
+        }
+
+        bool empty() const
+        {
+            return elements_.empty();
+        }
+
+        void fill(const T& value)
+        {
+            std::fill(elements_.begin(), elements_.end(), value);
+        }
+
+        ArrayND operator-() const
+        {
+            ArrayND result(shape_);
+
+            for (std::size_t index = 0; index < size(); ++index) {
+                result[index] = -elements_[index];
+            }
+
+            return result;
+        }
+
+        ArrayND& operator+=(const ArrayND& other)
+        {
+            assertSameShape(other);
+
+            for (std::size_t index = 0; index < size(); ++index) {
+                elements_[index] += other.elements_[index];
+            }
+
+            return *this;
+        }
+
+        ArrayND& operator-=(const ArrayND& other)
+        {
+            assertSameShape(other);
+
+            for (std::size_t index = 0; index < size(); ++index) {
+                elements_[index] -= other.elements_[index];
+            }
+
+            return *this;
+        }
+
+        template<typename U>
+        ArrayND& operator*=(U scalar)
+        {
+            for (auto& element : elements_) {
+                element *= static_cast<T>(scalar);
+            }
+
+            return *this;
+        }
+
+        template<typename U>
+        ArrayND& operator/=(U scalar)
+        {
+            for (auto& element : elements_) {
+                element /= static_cast<T>(scalar);
+            }
+
+            return *this;
+        }
+
+    private:
+        ShapeType shape_{};
+        ShapeType strides_{};
+        std::size_t padding_width_{};
+        std::vector<T> elements_;
+
+        void computeStrides()
+        {
+            std::size_t stride = 1;
+
+            for (std::size_t axis = Rank; axis-- > 0;) {
+                strides_[axis] = stride;
+                stride *= shape_[axis] + 2 * padding_width_;
+            }
+        }
+
+        static std::size_t totalSizeFromShape(const ShapeType& shape, std::size_t padding_width)
+        {
+            std::size_t total = 1;
+
+            for (std::size_t axis = 0; axis < Rank; ++axis) {
+                total *= shape[axis] + 2 * padding_width;
+            }
+
+            return total;
+        }
+
+        std::size_t flattenIndex(const IndexType& index) const
+        {
+            std::size_t flat_index = 0;
+
+            for (std::size_t axis = 0; axis < Rank; ++axis) {
+                if (index[axis] >= shape_[axis]) {
+                    throw std::out_of_range("ArrayND index out of bounds");
+                }
+
+                flat_index += (index[axis] + padding_width_) * strides_[axis];
+            }
+
+            return flat_index;
+        }
+
+        void assertSameShape(const ArrayND& other) const
+        {
+            if (shape_ != other.shape_ || padding_width_ != other.padding_width_) {
+                throw std::invalid_argument("ArrayND shape mismatch");
+            }
+        }
+    };
+
+
+    template<typename T, typename U, std::size_t Rank>
+    ArrayND<std::common_type_t<T, U>, Rank>
+        operator+(const ArrayND<T, Rank>& left, const ArrayND<U, Rank>& right)
     {
-        computeStrides();
-    }
+        if (left.shape() != right.shape() || left.paddingWidth() != right.paddingWidth()) {
+            throw std::invalid_argument("ArrayND shape mismatch in operator+");
+        }
 
-    T& operator[](std::size_t flat_index)
-    {
-        return elements_[flat_index];
-    }
+        using ResultType = std::common_type_t<T, U>;
 
-    const T& operator[](std::size_t flat_index) const
-    {
-        return elements_[flat_index];
-    }
+        ArrayND<ResultType, Rank> result(left.shape(), left.paddingWidth());
 
-    T& at(const IndexType& index)
-    {
-        return elements_.at(flattenIndex(index));
-    }
-
-    const T& at(const IndexType& index) const
-    {
-        return elements_.at(flattenIndex(index));
-    }
-
-    template<typename... Indices>
-        requires (sizeof...(Indices) == Rank)
-    T& at(Indices... indices)
-    {
-        return at(IndexType{ static_cast<std::size_t>(indices)... });
-    }
-
-    template<typename... Indices>
-        requires (sizeof...(Indices) == Rank)
-    const T& at(Indices... indices) const
-    {
-        return at(IndexType{ static_cast<std::size_t>(indices)... });
-    }
-
-    template<typename... Indices>
-        requires (sizeof...(Indices) == Rank)
-    T& operator()(Indices... indices)
-    {
-        return (*this)[IndexType{ static_cast<std::size_t>(indices)... }];
-    }
-
-    template<typename... Indices>
-        requires (sizeof...(Indices) == Rank)
-    const T& operator()(Indices... indices) const
-    {
-        return (*this)[IndexType{ static_cast<std::size_t>(indices)... }];
-    }
-
-    const ShapeType& shape() const
-    {
-        return shape_;
-    }
-
-    const ShapeType& strides() const
-    {
-        return strides_;
-    }
-
-    std::size_t paddingWidth() const
-    {
-        return padding_width_;
-    }
-
-    std::size_t size() const
-    {
-        return elements_.size();
-    }
-
-    bool empty() const
-    {
-        return elements_.empty();
-    }
-
-    void fill(const T& value)
-    {
-        std::fill(elements_.begin(), elements_.end(), value);
-    }
-
-    ArrayND operator-() const
-    {
-        ArrayND result(shape_);
-
-        for (std::size_t index = 0; index < size(); ++index) {
-            result[index] = -elements_[index];
+        for (std::size_t index = 0; index < result.size(); ++index) {
+            result[index] = left[index] + right[index];
         }
 
         return result;
     }
 
-    ArrayND& operator+=(const ArrayND& other)
+    template<typename T, typename U, std::size_t Rank>
+    ArrayND<std::common_type_t<T, U>, Rank>
+        operator-(const ArrayND<T, Rank>& left, const ArrayND<U, Rank>& right)
     {
-        assertSameShape(other);
-
-        for (std::size_t index = 0; index < size(); ++index) {
-            elements_[index] += other.elements_[index];
+        if (left.shape() != right.shape() || left.paddingWidth() != right.paddingWidth()) {
+            throw std::invalid_argument("ArrayND shape mismatch in operator-");
         }
 
-        return *this;
-    }
+        using ResultType = std::common_type_t<T, U>;
 
-    ArrayND& operator-=(const ArrayND& other)
-    {
-        assertSameShape(other);
+        ArrayND<ResultType, Rank> result(left.shape(), left.paddingWidth());
 
-        for (std::size_t index = 0; index < size(); ++index) {
-            elements_[index] -= other.elements_[index];
+        for (std::size_t index = 0; index < result.size(); ++index) {
+            result[index] = left[index] - right[index];
         }
 
-        return *this;
+        return result;
     }
 
-    template<typename U>
-    ArrayND& operator*=(U scalar)
+    template<typename T, typename U, std::size_t Rank>
+    ArrayND<std::common_type_t<T, U>, Rank>
+        operator*(const ArrayND<T, Rank>& array, U scalar)
     {
-        for (auto& element : elements_) {
-            element *= static_cast<T>(scalar);
+        using ResultType = std::common_type_t<T, U>;
+
+        ArrayND<ResultType, Rank> result(array.shape(), array.paddingWidth());
+
+        for (std::size_t index = 0; index < result.size(); ++index) {
+            result[index] = array[index] * scalar;
         }
 
-        return *this;
+        return result;
     }
 
-    template<typename U>
-    ArrayND& operator/=(U scalar)
+    template<typename T, typename U, std::size_t Rank>
+    ArrayND<std::common_type_t<T, U>, Rank>
+        operator*(U scalar, const ArrayND<T, Rank>& array)
     {
-        for (auto& element : elements_) {
-            element /= static_cast<T>(scalar);
+        return array * scalar;
+    }
+
+    template<typename T, typename U, std::size_t Rank>
+    ArrayND<std::common_type_t<T, U>, Rank>
+        operator/(const ArrayND<T, Rank>& array, U scalar)
+    {
+        using ResultType = std::common_type_t<T, U>;
+
+        ArrayND<ResultType, Rank> result(array.shape(), array.paddingWidth());
+
+        for (std::size_t index = 0; index < result.size(); ++index) {
+            result[index] = array[index] / scalar;
         }
 
-        return *this;
+        return result;
     }
-
-private:
-    ShapeType shape_{};
-    ShapeType strides_{};
-    std::size_t padding_width_{};
-    std::vector<T> elements_;
-
-    void computeStrides()
-    {
-        std::size_t stride = 1;
-
-        for (std::size_t axis = Rank; axis-- > 0;) {
-            strides_[axis] = stride;
-            stride *= shape_[axis] + 2 * padding_width_;
-        }
-    }
-
-    static std::size_t totalSizeFromShape(const ShapeType& shape, std::size_t padding_width)
-    {
-        std::size_t total = 1;
-
-        for (std::size_t axis = 0; axis < Rank; ++axis) {
-            total *= shape[axis] + 2 * padding_width;
-        }
-
-        return total;
-    }
-
-    std::size_t flattenIndex(const IndexType& index) const
-    {
-        std::size_t flat_index = 0;
-
-        for (std::size_t axis = 0; axis < Rank; ++axis) {
-            if (index[axis] >= shape_[axis]) {
-                throw std::out_of_range("ArrayND index out of bounds");
-            }
-
-            flat_index += (index[axis] + padding_width_) * strides_[axis];
-        }
-
-        return flat_index;
-    }
-
-    void assertSameShape(const ArrayND& other) const
-    {
-        if (shape_ != other.shape_ || padding_width_ != other.padding_width_) {
-            throw std::invalid_argument("ArrayND shape mismatch");
-        }
-    }
-};
-
-
-template<typename T, typename U, std::size_t Rank>
-ArrayND<std::common_type_t<T, U>, Rank>
-operator+(const ArrayND<T, Rank>& left, const ArrayND<U, Rank>& right)
-{
-    if (left.shape() != right.shape() || left.paddingWidth() != right.paddingWidth()) {
-        throw std::invalid_argument("ArrayND shape mismatch in operator+");
-    }
-
-    using ResultType = std::common_type_t<T, U>;
-
-    ArrayND<ResultType, Rank> result(left.shape(), left.paddingWidth());
-
-    for (std::size_t index = 0; index < result.size(); ++index) {
-        result[index] = left[index] + right[index];
-    }
-
-    return result;
-}
-
-template<typename T, typename U, std::size_t Rank>
-ArrayND<std::common_type_t<T, U>, Rank>
-operator-(const ArrayND<T, Rank>& left, const ArrayND<U, Rank>& right)
-{
-    if (left.shape() != right.shape() || left.paddingWidth() != right.paddingWidth()) {
-        throw std::invalid_argument("ArrayND shape mismatch in operator-");
-    }
-
-    using ResultType = std::common_type_t<T, U>;
-
-    ArrayND<ResultType, Rank> result(left.shape(), left.paddingWidth());
-
-    for (std::size_t index = 0; index < result.size(); ++index) {
-        result[index] = left[index] - right[index];
-    }
-
-    return result;
-}
-
-template<typename T, typename U, std::size_t Rank>
-ArrayND<std::common_type_t<T, U>, Rank>
-operator*(const ArrayND<T, Rank>& array, U scalar)
-{
-    using ResultType = std::common_type_t<T, U>;
-
-    ArrayND<ResultType, Rank> result(array.shape(), array.paddingWidth());
-
-    for (std::size_t index = 0; index < result.size(); ++index) {
-        result[index] = array[index] * scalar;
-    }
-
-    return result;
-}
-
-template<typename T, typename U, std::size_t Rank>
-ArrayND<std::common_type_t<T, U>, Rank>
-operator*(U scalar, const ArrayND<T, Rank>& array)
-{
-    return array * scalar;
-}
-
-template<typename T, typename U, std::size_t Rank>
-ArrayND<std::common_type_t<T, U>, Rank>
-operator/(const ArrayND<T, Rank>& array, U scalar)
-{
-    using ResultType = std::common_type_t<T, U>;
-
-    ArrayND<ResultType, Rank> result(array.shape(), array.paddingWidth());
-
-    for (std::size_t index = 0; index < result.size(); ++index) {
-        result[index] = array[index] / scalar;
-    }
-
-    return result;
-}
 }

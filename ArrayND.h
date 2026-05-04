@@ -12,13 +12,13 @@ template<typename T, std::size_t Rank>
 class ArrayND
 {
 public:
-    using value_type = T;
-    using shape_type = std::array<std::size_t, Rank>;
-    using index_type = std::array<std::size_t, Rank>;
+    using ValueType = T;
+    using ShapeType = std::array<std::size_t, Rank>;
+    using IndexType = std::array<std::size_t, Rank>;
 
     ArrayND() = default;
 
-    explicit ArrayND(shape_type shape, std::size_t padding_width = 0)
+    explicit ArrayND(ShapeType shape, std::size_t padding_width = 0)
         : shape_(shape),
           padding_width_(padding_width),
           elements_(totalSizeFromShape(shape, padding_width))
@@ -26,7 +26,7 @@ public:
         computeStrides();
     }
 
-    ArrayND(shape_type shape, const T& initial_value, std::size_t padding_width = 0)
+    ArrayND(ShapeType shape, const T& initial_value, std::size_t padding_width = 0)
         : shape_(shape),
           padding_width_(padding_width),
           elements_(totalSizeFromShape(shape, padding_width), initial_value)
@@ -44,12 +44,12 @@ public:
         return elements_[flat_index];
     }
 
-    T& at(const index_type& index)
+    T& at(const IndexType& index)
     {
         return elements_.at(flattenIndex(index));
     }
 
-    const T& at(const index_type& index) const
+    const T& at(const IndexType& index) const
     {
         return elements_.at(flattenIndex(index));
     }
@@ -58,36 +58,36 @@ public:
         requires (sizeof...(Indices) == Rank)
     T& at(Indices... indices)
     {
-        return at(index_type{ static_cast<std::size_t>(indices)... });
+        return at(IndexType{ static_cast<std::size_t>(indices)... });
     }
 
     template<typename... Indices>
         requires (sizeof...(Indices) == Rank)
     const T& at(Indices... indices) const
     {
-        return at(index_type{ static_cast<std::size_t>(indices)... });
+        return at(IndexType{ static_cast<std::size_t>(indices)... });
     }
 
     template<typename... Indices>
         requires (sizeof...(Indices) == Rank)
     T& operator()(Indices... indices)
     {
-        return (*this)[index_type{ static_cast<std::size_t>(indices)... }];
+        return (*this)[IndexType{ static_cast<std::size_t>(indices)... }];
     }
 
     template<typename... Indices>
         requires (sizeof...(Indices) == Rank)
     const T& operator()(Indices... indices) const
     {
-        return (*this)[index_type{ static_cast<std::size_t>(indices)... }];
+        return (*this)[IndexType{ static_cast<std::size_t>(indices)... }];
     }
 
-    const shape_type& shape() const
+    const ShapeType& shape() const
     {
         return shape_;
     }
 
-    const shape_type& strides() const
+    const ShapeType& strides() const
     {
         return strides_;
     }
@@ -166,8 +166,8 @@ public:
     }
 
 private:
-    shape_type shape_{};
-    shape_type strides_{};
+    ShapeType shape_{};
+    ShapeType strides_{};
     std::size_t padding_width_{};
     std::vector<T> elements_;
 
@@ -181,7 +181,7 @@ private:
         }
     }
 
-    static std::size_t totalSizeFromShape(const shape_type& shape, std::size_t padding_width)
+    static std::size_t totalSizeFromShape(const ShapeType& shape, std::size_t padding_width)
     {
         std::size_t total = 1;
 
@@ -192,7 +192,7 @@ private:
         return total;
     }
 
-    std::size_t flattenIndex(const index_type& index) const
+    std::size_t flattenIndex(const IndexType& index) const
     {
         std::size_t flat_index = 0;
 

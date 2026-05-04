@@ -3,15 +3,16 @@
 #include "Vec.h"
 #include "Point.h"
 #include "PointVecOps.h"
-#include "Tensor.h"
+#include "ArrayND.h"
 
 namespace toolbox
 {
-template<typename T, std::size_t dimensions, typename FieldType, std::size_t... Extents>
+template<typename T, std::size_t dimensions, typename FieldType>
 class ScalarField
 {
-	template<typename IndexSequence>
-	struct DataTypeHelper;
+	using DataType = ArrayND<T, dimensions>;
+	using ShapeType = typename DataType::ShapeType;
+	using PointType = Point<T, dimensions>;
 
 	template<std::size_t... Is>
 	struct DataTypeHelper<std::index_sequence<Is...>>
@@ -50,6 +51,8 @@ public:
 
 
 private:
+	T cell_size_{ 1 };
+	std::size_t ghost_width_{ 1 };
   DataType data_;
 
 	T interpolate(const Point<T, dimensions>& field_position) const

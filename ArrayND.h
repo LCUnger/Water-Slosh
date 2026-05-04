@@ -92,6 +92,11 @@ public:
         return strides_;
     }
 
+    std::size_t paddingWidth() const
+    {
+        return padding_width_;
+    }
+
     std::size_t size() const
     {
         return elements_.size();
@@ -204,7 +209,7 @@ private:
 
     void assertSameShape(const ArrayND& other) const
     {
-        if (shape_ != other.shape_) {
+        if (shape_ != other.shape_ || padding_width_ != other.padding_width_) {
             throw std::invalid_argument("ArrayND shape mismatch");
         }
     }
@@ -215,13 +220,13 @@ template<typename T, typename U, std::size_t Rank>
 ArrayND<std::common_type_t<T, U>, Rank>
 operator+(const ArrayND<T, Rank>& left, const ArrayND<U, Rank>& right)
 {
-    if (left.shape() != right.shape()) {
+    if (left.shape() != right.shape() || left.paddingWidth() != right.paddingWidth()) {
         throw std::invalid_argument("ArrayND shape mismatch in operator+");
     }
 
     using ResultType = std::common_type_t<T, U>;
 
-    ArrayND<ResultType, Rank> result(left.shape());
+    ArrayND<ResultType, Rank> result(left.shape(), left.paddingWidth());
 
     for (std::size_t index = 0; index < result.size(); ++index) {
         result[index] = left[index] + right[index];
@@ -234,13 +239,13 @@ template<typename T, typename U, std::size_t Rank>
 ArrayND<std::common_type_t<T, U>, Rank>
 operator-(const ArrayND<T, Rank>& left, const ArrayND<U, Rank>& right)
 {
-    if (left.shape() != right.shape()) {
+    if (left.shape() != right.shape() || left.paddingWidth() != right.paddingWidth()) {
         throw std::invalid_argument("ArrayND shape mismatch in operator-");
     }
 
     using ResultType = std::common_type_t<T, U>;
 
-    ArrayND<ResultType, Rank> result(left.shape());
+    ArrayND<ResultType, Rank> result(left.shape(), left.paddingWidth());
 
     for (std::size_t index = 0; index < result.size(); ++index) {
         result[index] = left[index] - right[index];
@@ -255,7 +260,7 @@ operator*(const ArrayND<T, Rank>& array, U scalar)
 {
     using ResultType = std::common_type_t<T, U>;
 
-    ArrayND<ResultType, Rank> result(array.shape());
+    ArrayND<ResultType, Rank> result(array.shape(), array.paddingWidth());
 
     for (std::size_t index = 0; index < result.size(); ++index) {
         result[index] = array[index] * scalar;
@@ -277,7 +282,7 @@ operator/(const ArrayND<T, Rank>& array, U scalar)
 {
     using ResultType = std::common_type_t<T, U>;
 
-    ArrayND<ResultType, Rank> result(array.shape());
+    ArrayND<ResultType, Rank> result(array.shape(), array.paddingWidth());
 
     for (std::size_t index = 0; index < result.size(); ++index) {
         result[index] = array[index] / scalar;

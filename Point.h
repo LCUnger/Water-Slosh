@@ -12,32 +12,32 @@ public:
 
     template<typename... Args>
         requires (sizeof...(Args) == dimensions && (std::convertible_to<Args, T> && ...))
-    constexpr Point(Args... args) : elements{ static_cast<T>(args)... } {}
+    constexpr Point(Args... args) : elements_{ static_cast<T>(args)... } {}
 
-    constexpr explicit Point(const std::array<T, dimensions>& values) : elements(values) {}
+    constexpr explicit Point(const std::array<T, dimensions>& values) : elements_(values) {}
 
-    constexpr T at(int index) const { return elements[index]; }
+    constexpr T at(int index) const { return elements_[index]; }
 
-    constexpr const T& operator[](int index) const { return elements[index]; }
-    constexpr T& operator[](int index) { return elements[index]; }
+    constexpr const T& operator[](int index) const { return elements_[index]; }
+    constexpr T& operator[](int index) { return elements_[index]; }
 
     constexpr Point& operator+=(const Vec<T, dimensions>& vector)
     {
         for (int index = 0; index < dimensions; ++index) {
-            elements[index] += vector[index];
+            elements_[index] += vector[index];
         }
         return *this;
     }
 
-    constexpr auto begin() { return elements.begin(); }
-    constexpr auto end() { return elements.end(); }
-    constexpr auto begin() const { return elements.begin(); }
-    constexpr auto end() const { return elements.end(); }
+    constexpr auto begin() { return elements_.begin(); }
+    constexpr auto end() { return elements_.end(); }
+    constexpr auto begin() const { return elements_.begin(); }
+    constexpr auto end() const { return elements_.end(); }
 
-    constexpr auto cbegin() const { return elements.cbegin(); }
-    constexpr auto cend() const { return elements.cend(); }
+    constexpr auto cbegin() const { return elements_.cbegin(); }
+    constexpr auto cend() const { return elements_.cend(); }
 
 private:
-    std::array<T, dimensions> elements{};
+    std::array<T, dimensions> elements_{};
 };
 }

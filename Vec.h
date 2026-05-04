@@ -16,20 +16,20 @@ public:
 
     template<typename... Args>
         requires (sizeof...(Args) == dimensions && (std::convertible_to<Args, T> && ...))
-    constexpr Vec(Args... args) : elements{ static_cast<T>(args)... } {}
+    constexpr Vec(Args... args) : elements_{ static_cast<T>(args)... } {}
 
-    constexpr explicit Vec(const std::array<T, dimensions>& values) : elements(values) {}
+    constexpr explicit Vec(const std::array<T, dimensions>& values) : elements_(values) {}
 
-    constexpr T at(int index) const { return elements[index]; }
+    constexpr T at(int index) const { return elements_[index]; }
 
-    constexpr const T& operator[](int index) const { return elements[index]; }
-    constexpr T& operator[](int index) { return elements[index]; }
+    constexpr const T& operator[](int index) const { return elements_[index]; }
+    constexpr T& operator[](int index) { return elements_[index]; }
 
     constexpr Vec operator-() const
     {
         Vec result;
         for (int index = 0; index < dimensions; ++index) {
-            result[index] = -elements[index];
+            result[index] = -elements_[index];
         }
         return result;
     }
@@ -37,7 +37,7 @@ public:
     constexpr Vec& operator+=(const Vec& vector)
     {
         for (int index = 0; index < dimensions; ++index) {
-            elements[index] += vector.elements[index];
+            elements_[index] += vector.elements_[index];
         }
         return *this;
     }
@@ -45,7 +45,7 @@ public:
     constexpr Vec& operator-=(const Vec& vector)
     {
         for (int index = 0; index < dimensions; ++index) {
-            elements[index] -= vector.elements[index];
+            elements_[index] -= vector.elements_[index];
         }
         return *this;
     }
@@ -53,7 +53,7 @@ public:
     template<typename U>
     constexpr Vec& operator*=(const U scalar)
     {
-        for (auto& component : elements) {
+        for (auto& component : elements_) {
             component *= static_cast<T>(scalar);
         }
         return *this;
@@ -62,7 +62,7 @@ public:
     template<typename U>
     constexpr Vec& operator/=(const U scalar)
     {
-        for (auto& component : elements) {
+        for (auto& component : elements_) {
             component /= static_cast<T>(scalar);
         }
         return *this;
@@ -71,7 +71,7 @@ public:
     T length_squared() const requires std::floating_point<T>
     {
         T sum{};
-        for (const auto& component : elements) {
+        for (const auto& component : elements_) {
             sum += component * component;
         }
         return sum;
@@ -101,7 +101,7 @@ public:
     bool near_zero() const requires std::floating_point<T>
     {
         const T s = static_cast<T>(1e-8);
-        for (const auto& component : elements) {
+        for (const auto& component : elements_) {
             if (std::fabs(component) >= s) {
                 return false;
             }
@@ -111,22 +111,22 @@ public:
 
 	Vec& fill(const T value)
     {
-        for (auto& component : elements) {
+        for (auto& component : elements_) {
             component = value;
         }
         return *this;
     }
 
-    constexpr auto begin() { return elements.begin(); }
-    constexpr auto end() { return elements.end(); }
-    constexpr auto begin() const { return elements.begin(); }
-    constexpr auto end() const { return elements.end(); }
+    constexpr auto begin() { return elements_.begin(); }
+    constexpr auto end() { return elements_.end(); }
+    constexpr auto begin() const { return elements_.begin(); }
+    constexpr auto end() const { return elements_.end(); }
 
-    constexpr auto cbegin() const { return elements.cbegin(); }
-    constexpr auto cend() const { return elements.cend(); }
+    constexpr auto cbegin() const { return elements_.cbegin(); }
+    constexpr auto cend() const { return elements_.cend(); }
 
 private:
-    std::array<T, dimensions> elements{};
+    std::array<T, dimensions> elements_{};
 };
 
 template<typename T, int dimensions>

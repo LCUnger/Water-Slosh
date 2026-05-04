@@ -50,7 +50,7 @@ public:
 
 
 private:
-	DataType data;
+  DataType data_;
 
 	T interpolate(const Point<T, dimensions>& field_position) const
 	{

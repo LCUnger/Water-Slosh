@@ -8,6 +8,8 @@
 #include <vector>
 #include <algorithm>
 
+namespace toolbox
+{
 template<typename T, std::size_t Rank>
 class ArrayND
 {
@@ -289,4 +291,5 @@ operator/(const ArrayND<T, Rank>& array, U scalar)
     }
 
     return result;
+}
 }

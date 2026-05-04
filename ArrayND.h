@@ -18,16 +18,18 @@ public:
 
     ArrayND() = default;
 
-    explicit ArrayND(shape_type shape)
+    explicit ArrayND(shape_type shape, std::size_t padding_width = 0)
         : shape_(shape),
-          elements_(totalSizeFromShape(shape))
+          padding_width_(padding_width),
+          elements_(totalSizeFromShape(shape, padding_width))
     {
         computeStrides();
     }
 
-    ArrayND(shape_type shape, const T& initial_value)
+    ArrayND(shape_type shape, const T& initial_value, std::size_t padding_width = 0)
         : shape_(shape),
-          elements_(totalSizeFromShape(shape), initial_value)
+          padding_width_(padding_width),
+          elements_(totalSizeFromShape(shape, padding_width), initial_value)
     {
         computeStrides();
     }
@@ -161,6 +163,7 @@ public:
 private:
     shape_type shape_{};
     shape_type strides_{};
+    std::size_t padding_width_{};
     std::vector<T> elements_;
 
     void computeStrides()
@@ -169,16 +172,16 @@ private:
 
         for (std::size_t axis = Rank; axis-- > 0;) {
             strides_[axis] = stride;
-            stride *= shape_[axis];
+            stride *= shape_[axis] + 2 * padding_width_;
         }
     }
 
-    static std::size_t totalSizeFromShape(const shape_type& shape)
+    static std::size_t totalSizeFromShape(const shape_type& shape, std::size_t padding_width)
     {
         std::size_t total = 1;
 
         for (std::size_t axis = 0; axis < Rank; ++axis) {
-            total *= shape[axis];
+            total *= shape[axis] + 2 * padding_width;
         }
 
         return total;
@@ -193,7 +196,7 @@ private:
                 throw std::out_of_range("ArrayND index out of bounds");
             }
 
-            flat_index += index[axis] * strides_[axis];
+            flat_index += (index[axis] + padding_width_) * strides_[axis];
         }
 
         return flat_index;

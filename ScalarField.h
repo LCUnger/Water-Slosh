@@ -14,18 +14,14 @@ class ScalarField
 	using ShapeType = typename DataType::ShapeType;
 	using PointType = Point<T, dimensions>;
 
-	template<std::size_t... Is>
-	struct DataTypeHelper<std::index_sequence<Is...>>
-	{
-		using type = Tensor<T, dimensions, (Extents + static_cast<std::size_t>(FieldType::index_extend[Is]))...>;
-	};
+public:
+	ScalarField() = default;
 
-	using DataType = typename DataTypeHelper<std::make_index_sequence<dimensions>>::type;
+	ScalarField(const ShapeType& shape, T cell_size = 1, std::size_t ghost_width = 1)
+		: cell_size_(cell_size), ghost_width_(std::max(ghost_width, std::size_t(1))), data_(shape + FieldType::index_extend, ghost_width_) {}
 
-
-	// Other solution, less complicated but less elegant:
-	//template<std::size_t... Is>
-	//static Tensor<T, dimensions, (Extents + FieldType::index_extend[Is]) ...> make_data_type(std::index_sequence<Is...>);
+	ScalarField(const ShapeType& shape, const T& initial_value, T cell_size = 1, std::size_t ghost_width = 1)
+		: cell_size_(cell_size), ghost_width_(std::max(ghost_width, std::size_t(1))), data_(shape, initial_value, ghost_width_) {}
 
 	//using DataType = decltype(make_data_type(std::make_index_sequence<dimensions>{}));
 

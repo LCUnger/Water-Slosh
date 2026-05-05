@@ -63,24 +63,24 @@ public:
        requires (sizeof...(Indices) == dimensions)
 	T& operator()(Indices... indices)
 	{
-		return data_[physicalToDataIndex(IndexType{ static_cast<int>(indices)... })];
+        return data_(physicalToDataIndex(IndexType{ static_cast<int>(indices)... }));
 	}
 
 	template<typename... Indices>
        requires (sizeof...(Indices) == dimensions)
 	const T& operator()(Indices... indices) const
 	{
-		return data_[physicalToDataIndex(IndexType{ static_cast<int>(indices)... })];
+        return data_(physicalToDataIndex(IndexType{ static_cast<int>(indices)... }));
 	}
 	
 	T& operator()(const IndexType& index)
 	{
-		return data_[physicalToDataIndex(index)];
+        return data_(physicalToDataIndex(index));
 	}
 
 	const T& operator()(const IndexType& index) const
 	{
-		return data_[physicalToDataIndex(index)];
+        return data_(physicalToDataIndex(index));
 	}
 
 	PointType worldToField(const PointType& world_position) const

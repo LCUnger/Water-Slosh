@@ -91,6 +91,12 @@ public:
 	{
 		return field_position + FieldType::offset;
 	}
+	//TODO : add sampling method with interpolation
+	T sample(const PointType& world_position) const {
+		const auto field_position = world_position - FieldType::offset;
+		(void)field_position;
+		return T{};
+	}
 
 
 private:
@@ -108,7 +114,13 @@ private:
 	// TODO : add interpolation method
 	T interpolateLinear(const Point<T, dimensions>& field_position) const
 	{
-		(void)field_position;
+
+		std::array<T, std::pow(2, dimensions)> weights{};
+
+		static constexpr std::size_t stencil_size = std::size_t{ 1 } << dimensions;
+		std::array<T, stencil_size> weights{};
+		for 
+
 		return T{};
 	}
 

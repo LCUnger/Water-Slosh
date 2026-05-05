@@ -129,6 +129,23 @@ public:
         return true;
     }
 
+    IndexType positionToIndex(const PointType& world_position) const {
+        const auto field_position = worldToField(world_position);
+        IndexType index;
+        for (std::size_t axis = 0; axis < dimensions; ++axis) {
+            index[axis] = static_cast<int>(std::floor(field_position[axis] / cell_size_));
+        }
+		return index;
+    }
+
+	PointType positionToCellposition(const PointType& world_position) const {
+        const auto field_position = worldToField(world_position);
+        PointType cell_position;
+        for (std::size_t axis = 0; axis < dimensions; ++axis) {
+            cell_position[axis] = field_position[axis] - cell_size_ * std::floor(field_position[axis] / cell_size_);
+        }
+        return cell_position;
+    }
 
     //TODO : add sampling method with interpolation
     T sample(const PointType& world_position) const {

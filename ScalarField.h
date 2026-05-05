@@ -13,87 +13,87 @@ namespace toolbox
 template<typename T, std::size_t dimensions, typename FieldType>
 class ScalarField
 {
-	using DataType = ArrayND<T, dimensions>;
-	using ShapeType = Vec<std::size_t, dimensions>;
-	using IndexType = Vec<int, dimensions>;
-	using PointType = Point<T, dimensions>;
+    using DataType = ArrayND<T, dimensions>;
+    using ShapeType = Vec<std::size_t, dimensions>;
+    using IndexType = Vec<int, dimensions>;
+    using PointType = Point<T, dimensions>;
 
 public:
-	ScalarField() = default;
-
-	explicit ScalarField(const ShapeType& shape, T cell_size = 1, std::size_t ghost_width = 1)
-		: cell_size_(cell_size),
-		ghost_width_(std::max(ghost_width, std::size_t(1))),
+    ScalarField() = default;
+    
+    explicit ScalarField(const ShapeType& shape, T cell_size = 1, std::size_t ghost_width = 1)
+        : cell_size_(cell_size),
+        ghost_width_(std::max(ghost_width, std::size_t(1))),
         physical_shape_(shape + FieldType::index_extend),
         data_(physical_shape_ + ShapeType(2 * ghost_width_)) {}
 
-	explicit ScalarField(const ShapeType& shape, const T& initial_value, T cell_size = 1, std::size_t ghost_width = 1)
-		: cell_size_(cell_size),
-		ghost_width_(std::max(ghost_width, std::size_t(1))),
+    explicit ScalarField(const ShapeType& shape, const T& initial_value, T cell_size = 1, std::size_t ghost_width = 1)
+        : cell_size_(cell_size),
+        ghost_width_(std::max(ghost_width, std::size_t(1))),
         physical_shape_(shape + FieldType::index_extend),
         data_(physical_shape_ + ShapeType(2 * ghost_width_), initial_value) {}
 
 
-	DataType& data() { return data_; }
+    DataType& data() { return data_; }
     const DataType& data() const { return data_; }
 
-	T& at(const IndexType& index)
-	{
-		return data_.at(physicalToDataIndex(index));
-	}
+    T& at(const IndexType& index)
+    {
+        return data_.at(physicalToDataIndex(index));
+    }
 
-	const T& at(const IndexType& index) const
-	{
-		return data_.at(physicalToDataIndex(index));
-	}
+    const T& at(const IndexType& index) const
+    {
+        return data_.at(physicalToDataIndex(index));
+    }
 
-	template<typename... Indices>
+    template<typename... Indices>
        requires (sizeof...(Indices) == dimensions)
-	T& at(Indices... indices)
-	{
-		return at(IndexType{ static_cast<int>(indices)... });
-	}
+    T& at(Indices... indices)
+    {
+        return at(IndexType{ static_cast<int>(indices)... });
+    }
 
-	template<typename... Indices>
+    template<typename... Indices>
        requires (sizeof...(Indices) == dimensions)
-	const T& at(Indices... indices) const
-	{
-		return at(IndexType{ static_cast<int>(indices)... });
-	}
+    const T& at(Indices... indices) const
+    {
+        return at(IndexType{ static_cast<int>(indices)... });
+    }
 
-	template<typename... Indices>
+    template<typename... Indices>
        requires (sizeof...(Indices) == dimensions)
-	T& operator()(Indices... indices)
-	{
+    T& operator()(Indices... indices)
+    {
         return data_(physicalToDataIndex(IndexType{ static_cast<int>(indices)... }));
-	}
+    }
 
-	template<typename... Indices>
+    template<typename... Indices>
        requires (sizeof...(Indices) == dimensions)
-	const T& operator()(Indices... indices) const
-	{
+    const T& operator()(Indices... indices) const
+    {
         return data_(physicalToDataIndex(IndexType{ static_cast<int>(indices)... }));
-	}
-	
-	T& operator()(const IndexType& index)
-	{
+    }
+
+    T& operator()(const IndexType& index)
+    {
         return data_(physicalToDataIndex(index));
-	}
+    }
 
-	const T& operator()(const IndexType& index) const
-	{
+    const T& operator()(const IndexType& index) const
+    {
         return data_(physicalToDataIndex(index));
-	}
+    }
 
-	PointType worldToField(const PointType& world_position) const
-	{
-		return world_position - FieldType::offset;
-	}
+    PointType worldToField(const PointType& world_position) const
+    {
+        return world_position - FieldType::offset;
+    }
 
-	PointType fieldToWorld(const PointType& field_position) const
-	{
-		return field_position + FieldType::offset;
-	}
+    PointType fieldToWorld(const PointType& field_position) const
+    {
+        return field_position + FieldType::offset;
+    }
 
     bool isStored(const IndexType& index) const
     {
@@ -130,39 +130,28 @@ public:
     }
 
 
-	//TODO : add sampling method with interpolation
-	T sample(const PointType& world_position) const {
-		const auto field_position = world_position - FieldType::offset;
-		(void)field_position;
-		return T{};
-	}
+    //TODO : add sampling method with interpolation
+    T sample(const PointType& world_position) const {
+        const auto field_position = world_position - FieldType::offset;
+        (void)field_position;
+        return T{};
+    }
 
 
 private:
-	T cell_size_{ 1 };
-	std::size_t ghost_width_{ 1 };
+    T cell_size_{ 1 };
+    std::size_t ghost_width_{ 1 };
     ShapeType physical_shape_{};
-  DataType data_;
+    DataType data_;
 
-	
-	IndexType physicalToDataIndex(const IndexType& physical_index) const
-	{
-		return physical_index + IndexType(static_cast<int>(ghost_width_));
-	}
+    
+    IndexType physicalToDataIndex(const IndexType& physical_index) const
+    {
+        return physical_index + IndexType(static_cast<int>(ghost_width_));
+    }
 
 
-	// TODO : add interpolation method
-	T interpolateLinear(const Point<T, dimensions>& field_position) const
-	{
-
-		std::array<T, std::pow(2, dimensions)> weights{};
-
-		static constexpr std::size_t stencil_size = std::size_t{ 1 } << dimensions;
-		std::array<T, stencil_size> weights{};
-		for 
-
-		return T{};
-	}
+    // TODO : Decide what to do regarding S field / active cells, and how to handle interpolation near boundaries (ghost cells)
 
 };
 }

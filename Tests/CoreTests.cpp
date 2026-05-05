@@ -2,6 +2,7 @@
 #include "../FieldTypes.h"
 #include "../Point.h"
 #include "../PointVecOps.h"
+#include "../ScalarField.h"
 #include "../Tensor.h"
 #include "../Vec.h"
 
@@ -328,6 +329,54 @@ void testFieldTypes()
     EXPECT_EQ(FaceY3::index_extend[2], std::size_t{ 0 });
 }
 
+void testScalarFieldIndexBounds()
+{
+    using CellField = toolbox::ScalarField<double, 2, toolbox::CellCentered<double, 2>>;
+    using FaceYField = toolbox::ScalarField<double, 2, toolbox::FaceCentered<double, 2, 1>>;
+    using Index = toolbox::Vec<int, 2>;
+    using Shape = toolbox::Vec<std::size_t, 2>;
+
+    CellField cell_field{ Shape{ 4, 3 }, 1.0, std::size_t{ 2 } };
+    EXPECT_EQ(cell_field.data().shape()[0], std::size_t{ 8 });
+    EXPECT_EQ(cell_field.data().shape()[1], std::size_t{ 7 });
+
+    EXPECT_TRUE(cell_field.isPhysical(Index{ 0, 0 }));
+    EXPECT_TRUE(cell_field.isPhysical(Index{ 3, 2 }));
+    EXPECT_FALSE(cell_field.isPhysical(Index{ -1, 0 }));
+    EXPECT_FALSE(cell_field.isPhysical(Index{ 4, 2 }));
+    EXPECT_FALSE(cell_field.isPhysical(Index{ 3, 3 }));
+
+    EXPECT_TRUE(cell_field.isStored(Index{ -2, -2 }));
+    EXPECT_TRUE(cell_field.isStored(Index{ 5, 4 }));
+    EXPECT_FALSE(cell_field.isStored(Index{ -3, 0 }));
+    EXPECT_FALSE(cell_field.isStored(Index{ 6, 0 }));
+    EXPECT_FALSE(cell_field.isStored(Index{ 0, 5 }));
+
+    cell_field.at(Index{ -2, -2 }) = 12.0;
+    cell_field.at(Index{ 5, 4 }) = 24.0;
+    cell_field(Index{ 0, 0 }) = 36.0;
+    cell_field(3, 2) = 48.0;
+    EXPECT_NEAR(cell_field.at(Index{ -2, -2 }), 12.0, 1e-12);
+    EXPECT_NEAR(cell_field.at(Index{ 5, 4 }), 24.0, 1e-12);
+    EXPECT_NEAR(cell_field(Index{ 0, 0 }), 36.0, 1e-12);
+    EXPECT_NEAR(cell_field(3, 2), 48.0, 1e-12);
+    EXPECT_THROWS(cell_field.at(Index{ 6, 0 }), std::out_of_range);
+
+    FaceYField face_field{ Shape{ 4, 3 }, 1.0, std::size_t{ 1 } };
+    EXPECT_EQ(face_field.data().shape()[0], std::size_t{ 6 });
+    EXPECT_EQ(face_field.data().shape()[1], std::size_t{ 6 });
+
+    EXPECT_TRUE(face_field.isPhysical(Index{ 3, 3 }));
+    EXPECT_FALSE(face_field.isPhysical(Index{ 4, 3 }));
+    EXPECT_FALSE(face_field.isPhysical(Index{ 3, 4 }));
+
+    EXPECT_TRUE(face_field.isStored(Index{ -1, -1 }));
+    EXPECT_TRUE(face_field.isStored(Index{ 4, 4 }));
+    EXPECT_FALSE(face_field.isStored(Index{ -2, 0 }));
+    EXPECT_FALSE(face_field.isStored(Index{ 5, 0 }));
+    EXPECT_FALSE(face_field.isStored(Index{ 0, 5 }));
+}
+
 void testTensorConstructionAccessAndArithmetic()
 {
     Tensor<int, 1, 0, 3> constructed{ 1, 2, 3 };
@@ -504,6 +553,7 @@ int main()
     runTest("Point", testPoint);
     runTest("PointVecOps", testPointVecOps);
     runTest("FieldTypes", testFieldTypes);
+    runTest("ScalarField index bounds", testScalarFieldIndexBounds);
     runTest("Tensor construction, access, and arithmetic", testTensorConstructionAccessAndArithmetic);
     runTest("ArrayND construction, access, and fill", testArrayNDConstructionAccessAndFill);
     runTest("ArrayND arithmetic and errors", testArrayNDArithmeticAndErrors);

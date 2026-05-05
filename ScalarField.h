@@ -6,6 +6,7 @@
 #include "ArrayND.h"
 
 #include <algorithm>
+#include <array>
 
 namespace toolbox
 {
@@ -32,6 +33,7 @@ public:
 
 
 	DataType& data() { return data_; }
+    const DataType& data() const { return data_; }
 
 	T& at(const IndexType& index)
 	{
@@ -44,28 +46,28 @@ public:
 	}
 
 	template<typename... Indices>
-		requires (sizeof...(Indices) == Rank)
+       requires (sizeof...(Indices) == dimensions)
 	T& at(Indices... indices)
 	{
 		return at(IndexType{ static_cast<int>(indices)... });
 	}
 
 	template<typename... Indices>
-		requires (sizeof...(Indices) == Rank)
+       requires (sizeof...(Indices) == dimensions)
 	const T& at(Indices... indices) const
 	{
 		return at(IndexType{ static_cast<int>(indices)... });
 	}
 
 	template<typename... Indices>
-		requires (sizeof...(Indices) == Rank)
+       requires (sizeof...(Indices) == dimensions)
 	T& operator()(Indices... indices)
 	{
 		return data_[physicalToDataIndex(IndexType{ static_cast<int>(indices)... })];
 	}
 
 	template<typename... Indices>
-		requires (sizeof...(Indices) == Rank)
+       requires (sizeof...(Indices) == dimensions)
 	const T& operator()(Indices... indices) const
 	{
 		return data_[physicalToDataIndex(IndexType{ static_cast<int>(indices)... })];
@@ -80,9 +82,6 @@ public:
 	{
 		return data_[physicalToDataIndex(index)];
 	}
-
-	const T& operator()(const IndexType& index) const
-	{
 
 	PointType worldToField(const PointType& world_position) const
 	{

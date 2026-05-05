@@ -94,6 +94,42 @@ public:
 	{
 		return field_position + FieldType::offset;
 	}
+
+    bool isStored(const IndexType& index) const
+    {
+        if (data_.empty()) {
+            return false;
+        }
+
+        for (std::size_t axis = 0; axis < dimensions; ++axis) {
+            const int lower_bound = -static_cast<int>(ghost_width_);
+            if (index[axis] < lower_bound) {
+                return false;
+            }
+
+            const auto data_index = static_cast<std::size_t>(index[axis] - lower_bound);
+            if (data_index >= data_.shape()[axis]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool isPhysical(const IndexType& index) const
+    {
+        if (data_.empty()) {
+            return false;
+        }
+
+        for (std::size_t axis = 0; axis < dimensions; ++axis) {
+            if (index[axis] < 0 || static_cast<std::size_t>(index[axis]) >= physical_shape_[axis]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
 	//TODO : add sampling method with interpolation
 	T sample(const PointType& world_position) const {
 		const auto field_position = world_position - FieldType::offset;

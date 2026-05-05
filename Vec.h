@@ -20,6 +20,13 @@ public:
 
     constexpr explicit Vec(const std::array<T, dimensions>& values) : elements_(values) {}
 
+    constexpr explicit Vec(const T& value)
+    {
+        for (auto& component : elements_) {
+            component = value;
+        }
+	}
+
     constexpr T at(int index) const { return elements_[index]; }
 
     constexpr const T& operator[](int index) const { return elements_[index]; }

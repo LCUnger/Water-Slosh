@@ -5,6 +5,8 @@
 #include "PointVecOps.h"
 #include "ArrayND.h"
 
+#include <algorithm>
+
 namespace toolbox
 {
 template<typename T, std::size_t dimensions, typename FieldType>

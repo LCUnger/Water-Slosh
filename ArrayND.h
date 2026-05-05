@@ -15,27 +15,26 @@ namespace toolbox
     {
     public:
         using ValueType = T;
-        using ShapeType = std::array<std::size_t, Rank>;
-        using IndexType = std::array<std::size_t, Rank>;
+        using ShapeType = Vec<std::size_t, Rank>;
+        using IndexType = Vec<int, Rank>;
 
         ArrayND() = default;
 
-        explicit ArrayND(ShapeType shape, std::size_t padding_width = 0)
+        explicit ArrayND(ShapeType shape)
             : shape_(shape),
-            padding_width_(padding_width),
-            elements_(totalSizeFromShape(shape, padding_width))
+            elements_(SizeFromShape(shape))
         {
             computeStrides();
         }
 
-        ArrayND(ShapeType shape, const T& initial_value, std::size_t padding_width = 0)
+        ArrayND(ShapeType shape, const T& initial_value)
             : shape_(shape),
-            padding_width_(padding_width),
-            elements_(totalSizeFromShape(shape, padding_width), initial_value)
+            elements_(SizeFromShape(shape), initial_value)
         {
             computeStrides();
         }
 
+        // Flat index accessing
         T& operator[](std::size_t flat_index)
         {
             return elements_[flat_index];
@@ -46,6 +45,7 @@ namespace toolbox
             return elements_[flat_index];
         }
 
+        // Accessing with range control (small overhead)
         T& at(const IndexType& index)
         {
             return elements_.at(flattenIndex(index));
@@ -60,52 +60,50 @@ namespace toolbox
             requires (sizeof...(Indices) == Rank)
         T& at(Indices... indices)
         {
-            return at(IndexType{ static_cast<std::size_t>(indices)... });
+        return at(IndexType{ static_cast<int>(indices)... });
         }
 
         template<typename... Indices>
             requires (sizeof...(Indices) == Rank)
         const T& at(Indices... indices) const
         {
-            return at(IndexType{ static_cast<std::size_t>(indices)... });
+            return at(IndexType{ static_cast<int>(indices)... });
         }
 
+        // Index accessing without range control (no overhead of .at())
         template<typename... Indices>
             requires (sizeof...(Indices) == Rank)
         T& operator()(Indices... indices)
         {
-            return (*this)[IndexType{ static_cast<std::size_t>(indices)... }];
+            return (*this)[flattenIndexUnchecked(IndexType{ static_cast<int>(indices)... })];
         }
 
         template<typename... Indices>
             requires (sizeof...(Indices) == Rank)
         const T& operator()(Indices... indices) const
         {
-            return (*this)[IndexType{ static_cast<std::size_t>(indices)... }];
+            return (*this)[flattenIndexUnchecked(IndexType{ static_cast<int>(indices)... })];
         }
+
+        T& operator()(const IndexType& index)
+        {
+            return (*this)[flattenIndexUnchecked(index)];
+        }
+
+        const T& operator()(const IndexType& index) const
+        {
+            return (*this)[flattenIndexUnchecked(index)];
+        }
+
 
         const ShapeType& shape() const
         {
             return shape_;
         }
 
-        const ShapeType& paddedShape() const
-        {
-			ShapeType padded_shape{};
-			for (std::size_t axis = 0; axis < Rank; ++axis) {
-                padded_shape[axis] = shape_[axis] + 2 * padding_width_;
-            }
-            return padded_shape;
-		}
-
         const ShapeType& strides() const
         {
             return strides_;
-        }
-
-        std::size_t paddingWidth() const
-        {
-            return padding_width_;
         }
 
         std::size_t size() const
@@ -179,7 +177,6 @@ namespace toolbox
     private:
         ShapeType shape_{};
         ShapeType strides_{};
-        std::size_t padding_width_{};
         std::vector<T> elements_;
 
         void computeStrides()
@@ -188,16 +185,16 @@ namespace toolbox
 
             for (std::size_t axis = Rank; axis-- > 0;) {
                 strides_[axis] = stride;
-                stride *= shape_[axis] + 2 * padding_width_;
+                stride *= shape_[axis];
             }
         }
 
-        static std::size_t totalSizeFromShape(const ShapeType& shape, std::size_t padding_width)
+        static std::size_t SizeFromShape(const ShapeType& shape)
         {
             std::size_t total = 1;
 
             for (std::size_t axis = 0; axis < Rank; ++axis) {
-                total *= shape[axis] + 2 * padding_width;
+                total *= shape[axis];
             }
 
             return total;
@@ -208,11 +205,22 @@ namespace toolbox
             std::size_t flat_index = 0;
 
             for (std::size_t axis = 0; axis < Rank; ++axis) {
-                if (index[axis] >= shape_[axis]) {
+                if (index[axis] < 0 || static_cast<std::size_t>(index[axis]) >= shape_[axis]) {
                     throw std::out_of_range("ArrayND index out of bounds");
                 }
 
-                flat_index += (index[axis] + padding_width_) * strides_[axis];
+                flat_index += static_cast<std::size_t>(index[axis]) * strides_[axis];
+            }
+
+            return flat_index;
+        }
+
+        std::size_t flattenIndexUnchecked(const IndexType& index) const
+        {
+            std::size_t flat_index = 0;
+
+            for (std::size_t axis = 0; axis < Rank; ++axis) {
+                flat_index += static_cast<std::size_t>(index[axis]) * strides_[axis];
             }
 
             return flat_index;
@@ -220,7 +228,7 @@ namespace toolbox
 
         void assertSameShape(const ArrayND& other) const
         {
-            if (shape_ != other.shape_ || padding_width_ != other.padding_width_) {
+            if (shape_ != other.shape_) {
                 throw std::invalid_argument("ArrayND shape mismatch");
             }
         }
@@ -231,13 +239,13 @@ namespace toolbox
     ArrayND<std::common_type_t<T, U>, Rank>
         operator+(const ArrayND<T, Rank>& left, const ArrayND<U, Rank>& right)
     {
-        if (left.shape() != right.shape() || left.paddingWidth() != right.paddingWidth()) {
+        if (left.shape() != right.shape()) {
             throw std::invalid_argument("ArrayND shape mismatch in operator+");
         }
 
         using ResultType = std::common_type_t<T, U>;
 
-        ArrayND<ResultType, Rank> result(left.shape(), left.paddingWidth());
+        ArrayND<ResultType, Rank> result(left.shape());
 
         for (std::size_t index = 0; index < result.size(); ++index) {
             result[index] = left[index] + right[index];
@@ -250,13 +258,13 @@ namespace toolbox
     ArrayND<std::common_type_t<T, U>, Rank>
         operator-(const ArrayND<T, Rank>& left, const ArrayND<U, Rank>& right)
     {
-        if (left.shape() != right.shape() || left.paddingWidth() != right.paddingWidth()) {
+        if (left.shape() != right.shape()) {
             throw std::invalid_argument("ArrayND shape mismatch in operator-");
         }
 
         using ResultType = std::common_type_t<T, U>;
 
-        ArrayND<ResultType, Rank> result(left.shape(), left.paddingWidth());
+        ArrayND<ResultType, Rank> result(left.shape());
 
         for (std::size_t index = 0; index < result.size(); ++index) {
             result[index] = left[index] - right[index];
@@ -271,7 +279,7 @@ namespace toolbox
     {
         using ResultType = std::common_type_t<T, U>;
 
-        ArrayND<ResultType, Rank> result(array.shape(), array.paddingWidth());
+        ArrayND<ResultType, Rank> result(array.shape());
 
         for (std::size_t index = 0; index < result.size(); ++index) {
             result[index] = array[index] * scalar;
@@ -293,7 +301,7 @@ namespace toolbox
     {
         using ResultType = std::common_type_t<T, U>;
 
-        ArrayND<ResultType, Rank> result(array.shape(), array.paddingWidth());
+        ArrayND<ResultType, Rank> result(array.shape());
 
         for (std::size_t index = 0; index < result.size(); ++index) {
             result[index] = array[index] / scalar;

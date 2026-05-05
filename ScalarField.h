@@ -28,17 +28,59 @@ public:
 		ghost_width_(std::max(ghost_width, std::size_t(1))),
 		data_(shape + FieldType::index_extend + ShapeType(ghost_width_), initial_value) {}
 
-	//using DataType = decltype(make_data_type(std::make_index_sequence<dimensions>{}));
 
+	DataType& data() { return data_; }
 
-public:
-	
-
-    T sample(const Point<T, dimensions>& world_position) const {
-     const auto field_position = world_position - FieldType::offset;
-		(void)field_position;
-		return T{};
+	T& at(const IndexType& index)
+	{
+		return data_.at(physicalToDataIndex(index));
 	}
+
+	const T& at(const IndexType& index) const
+	{
+		return data_.at(physicalToDataIndex(index));
+	}
+
+	template<typename... Indices>
+		requires (sizeof...(Indices) == Rank)
+	T& at(Indices... indices)
+	{
+		return at(IndexType{ static_cast<int>(indices)... });
+	}
+
+	template<typename... Indices>
+		requires (sizeof...(Indices) == Rank)
+	const T& at(Indices... indices) const
+	{
+		return at(IndexType{ static_cast<int>(indices)... });
+	}
+
+	template<typename... Indices>
+		requires (sizeof...(Indices) == Rank)
+	T& operator()(Indices... indices)
+	{
+		return data_[physicalToDataIndex(IndexType{ static_cast<int>(indices)... })];
+	}
+
+	template<typename... Indices>
+		requires (sizeof...(Indices) == Rank)
+	const T& operator()(Indices... indices) const
+	{
+		return data_[physicalToDataIndex(IndexType{ static_cast<int>(indices)... })];
+	}
+	
+	T& operator()(const IndexType& index)
+	{
+		return data_[physicalToDataIndex(index)];
+	}
+
+	const T& operator()(const IndexType& index) const
+	{
+		return data_[physicalToDataIndex(index)];
+	}
+
+	const T& operator()(const IndexType& index) const
+	{
 
 	PointType worldToField(const PointType& world_position) const
 	{
@@ -56,7 +98,15 @@ private:
 	std::size_t ghost_width_{ 1 };
   DataType data_;
 
-	T interpolate(const Point<T, dimensions>& field_position) const
+	
+	IndexType physicalToDataIndex(const IndexType& physical_index) const
+	{
+		return physical_index + IndexType(static_cast<int>(ghost_width_));
+	}
+
+
+	// TODO : add interpolation method
+	T interpolateLinear(const Point<T, dimensions>& field_position) const
 	{
 		(void)field_position;
 		return T{};

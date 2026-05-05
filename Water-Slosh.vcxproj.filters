@@ -21,6 +21,9 @@
     <Filter Include="Source Files\core">
       <UniqueIdentifier>{8d032762-d51f-4a67-b726-7799ca81f007}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Tests">
+      <UniqueIdentifier>{1cf9899f-3426-4d9a-8817-c8a4d7e2f3be}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Water-Slosh.cpp">
@@ -70,5 +73,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".github\copilot-instructions.md" />
+    <None Include=".gitignore" />
+    <None Include="Tests\CoreTests.cpp">
+      <Filter>Tests</Filter>
+    </None>
+    <None Include="Tests\run-core-tests.bat">
+      <Filter>Tests</Filter>
+    </None>
   </ItemGroup>
 </Project>

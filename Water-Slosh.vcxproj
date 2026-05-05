@@ -146,6 +146,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".github\copilot-instructions.md" />
+    <None Include=".gitignore" />
+    <None Include="Tests\CoreTests.cpp" />
+    <None Include="Tests\run-core-tests.bat" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

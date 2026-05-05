@@ -159,6 +159,23 @@ inline Vec<std::common_type_t<T, U>, dimensions> operator+(const Vec<T, dimensio
 }
 
 template<typename T, typename U, int dimensions>
+inline bool operator==(const Vec<T, dimensions>& left, const Vec<U, dimensions>& right)
+{
+    for (int index = 0; index < dimensions; ++index) {
+        if (left[index] != right[index]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+template<typename T, typename U, int dimensions>
+inline bool operator!=(const Vec<T, dimensions>& left, const Vec<U, dimensions>& right)
+{
+    return !(left == right);
+}
+
+template<typename T, typename U, int dimensions>
 inline Vec<std::common_type_t<T, U>, dimensions> operator-(const Vec<T, dimensions>& left, const Vec<U, dimensions>& right)
 {
     Vec<std::common_type_t<T, U>, dimensions> result;

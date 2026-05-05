@@ -26,6 +26,14 @@ void expectTrue(bool condition, const char* expression, const char* file, int li
     }
 }
 
+void expectFalse(bool condition, const char* expression, const char* file, int line)
+{
+    if (condition) {
+        ++failed_expectations;
+        std::cerr << file << ':' << line << ": expected not " << expression << '\n';
+    }
+}
+
 template<typename T, typename U>
 void expectEqual(const T& actual, const U& expected, const char* actual_expression, const char* expected_expression, const char* file, int line)
 {
@@ -96,6 +104,7 @@ void runTest(const char* name, void (*test)())
 }
 
 #define EXPECT_TRUE(expression) expectTrue((expression), #expression, __FILE__, __LINE__)
+#define EXPECT_FALSE(expression) expectFalse((expression), #expression, __FILE__, __LINE__)
 #define EXPECT_EQ(actual, expected) expectEqual((actual), (expected), #actual, #expected, __FILE__, __LINE__)
 #define EXPECT_NEAR(actual, expected, tolerance) expectNear((actual), (expected), (tolerance), #actual, #expected, __FILE__, __LINE__)
 #define EXPECT_THROWS(expression, exception_type) expectThrows<exception_type>([&] { (void)(expression); }, #expression, #exception_type, __FILE__, __LINE__)
@@ -232,7 +241,7 @@ void testVecFloatingPointHelpers()
     const Vec<double, 3> nearly_zero{ 1e-10, -1e-10, 0.0 };
     const Vec<double, 3> not_nearly_zero{ 1e-7, 0.0, 0.0 };
     EXPECT_TRUE(nearly_zero.near_zero());
-    EXPECT_TRUE(!not_nearly_zero.near_zero());
+    EXPECT_FALSE(not_nearly_zero.near_zero());
 
     Vec<double, 2> zero;
     zero.normalize();
@@ -389,7 +398,7 @@ void testArrayNDConstructionAccessAndFill()
     EXPECT_EQ(empty.size(), std::size_t{ 0 });
 
     ArrayND<int, 2> array{ Vec<std::size_t, 2>{ 2, 3 }, 7 };
-    EXPECT_TRUE(!array.empty());
+    EXPECT_FALSE(array.empty());
     EXPECT_EQ(array.size(), std::size_t{ 6 });
     EXPECT_EQ(array.shape()[0], std::size_t{ 2 });
     EXPECT_EQ(array.shape()[1], std::size_t{ 3 });

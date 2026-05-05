@@ -11,7 +11,8 @@ template<typename T, std::size_t dimensions, typename FieldType>
 class ScalarField
 {
 	using DataType = ArrayND<T, dimensions>;
-	using ShapeType = typename DataType::ShapeType;
+	using ShapeType = Vec<std::size_t, dimensions>;
+	using IndexType = Vec<int, dimensions>;
 	using PointType = Point<T, dimensions>;
 
 public:

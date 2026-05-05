@@ -1,12 +1,14 @@
 #pragma once
 
+#include "Vec.h"
+
 #include <array>
+#include <algorithm>
 #include <concepts>
 #include <cstddef>
 #include <stdexcept>
 #include <type_traits>
 #include <vector>
-#include <algorithm>
 
 namespace toolbox
 {

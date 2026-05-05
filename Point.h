@@ -2,9 +2,13 @@
 
 #include "Vec.h"
 
+#include <array>
+#include <concepts>
+#include <cstddef>
+
 namespace toolbox
 {
-template<typename T, int dimensions>
+template<typename T, std::size_t dimensions>
 class Point
 {
 public:
@@ -16,14 +20,14 @@ public:
 
     constexpr explicit Point(const std::array<T, dimensions>& values) : elements_(values) {}
 
-    constexpr T at(int index) const { return elements_[index]; }
+    constexpr T at(std::size_t index) const { return elements_[index]; }
 
-    constexpr const T& operator[](int index) const { return elements_[index]; }
-    constexpr T& operator[](int index) { return elements_[index]; }
+    constexpr const T& operator[](std::size_t index) const { return elements_[index]; }
+    constexpr T& operator[](std::size_t index) { return elements_[index]; }
 
     constexpr Point& operator+=(const Vec<T, dimensions>& vector)
     {
-        for (int index = 0; index < dimensions; ++index) {
+        for (std::size_t index = 0; index < dimensions; ++index) {
             elements_[index] += vector[index];
         }
         return *this;

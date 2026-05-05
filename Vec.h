@@ -3,12 +3,13 @@
 #include <array>
 #include <cmath>
 #include <concepts>
+#include <cstddef>
 #include <iostream>
 #include <type_traits>
 
 namespace toolbox
 {
-template<typename T, int dimensions>
+template<typename T, std::size_t dimensions>
 class Vec
 {
 public:
@@ -27,15 +28,15 @@ public:
         }
 	}
 
-    constexpr T at(int index) const { return elements_[index]; }
+    constexpr T at(std::size_t index) const { return elements_[index]; }
 
-    constexpr const T& operator[](int index) const { return elements_[index]; }
-    constexpr T& operator[](int index) { return elements_[index]; }
+    constexpr const T& operator[](std::size_t index) const { return elements_[index]; }
+    constexpr T& operator[](std::size_t index) { return elements_[index]; }
 
     constexpr Vec operator-() const
     {
         Vec result;
-        for (int index = 0; index < dimensions; ++index) {
+        for (std::size_t index = 0; index < dimensions; ++index) {
             result[index] = -elements_[index];
         }
         return result;
@@ -43,7 +44,7 @@ public:
 
     constexpr Vec& operator+=(const Vec& vector)
     {
-        for (int index = 0; index < dimensions; ++index) {
+        for (std::size_t index = 0; index < dimensions; ++index) {
             elements_[index] += vector.elements_[index];
         }
         return *this;
@@ -51,7 +52,7 @@ public:
 
     constexpr Vec& operator-=(const Vec& vector)
     {
-        for (int index = 0; index < dimensions; ++index) {
+        for (std::size_t index = 0; index < dimensions; ++index) {
             elements_[index] -= vector.elements_[index];
         }
         return *this;
@@ -136,10 +137,10 @@ private:
     std::array<T, dimensions> elements_{};
 };
 
-template<typename T, int dimensions>
+template<typename T, std::size_t dimensions>
 inline std::ostream& operator<<(std::ostream& out, const Vec<T, dimensions>& vector)
 {
-    for (int index = 0; index < dimensions; ++index) {
+    for (std::size_t index = 0; index < dimensions; ++index) {
         if (index > 0) {
             out << ' ';
         }
@@ -148,20 +149,20 @@ inline std::ostream& operator<<(std::ostream& out, const Vec<T, dimensions>& vec
     return out;
 }
 
-template<typename T, typename U, int dimensions>
+template<typename T, typename U, std::size_t dimensions>
 inline Vec<std::common_type_t<T, U>, dimensions> operator+(const Vec<T, dimensions>& left, const Vec<U, dimensions>& right)
 {
     Vec<std::common_type_t<T, U>, dimensions> result;
-    for (int index = 0; index < dimensions; ++index) {
+    for (std::size_t index = 0; index < dimensions; ++index) {
         result[index] = left[index] + right[index];
     }
     return result;
 }
 
-template<typename T, typename U, int dimensions>
+template<typename T, typename U, std::size_t dimensions>
 inline bool operator==(const Vec<T, dimensions>& left, const Vec<U, dimensions>& right)
 {
-    for (int index = 0; index < dimensions; ++index) {
+    for (std::size_t index = 0; index < dimensions; ++index) {
         if (left[index] != right[index]) {
             return false;
         }
@@ -169,69 +170,69 @@ inline bool operator==(const Vec<T, dimensions>& left, const Vec<U, dimensions>&
     return true;
 }
 
-template<typename T, typename U, int dimensions>
+template<typename T, typename U, std::size_t dimensions>
 inline bool operator!=(const Vec<T, dimensions>& left, const Vec<U, dimensions>& right)
 {
     return !(left == right);
 }
 
-template<typename T, typename U, int dimensions>
+template<typename T, typename U, std::size_t dimensions>
 inline Vec<std::common_type_t<T, U>, dimensions> operator-(const Vec<T, dimensions>& left, const Vec<U, dimensions>& right)
 {
     Vec<std::common_type_t<T, U>, dimensions> result;
-    for (int index = 0; index < dimensions; ++index) {
+    for (std::size_t index = 0; index < dimensions; ++index) {
         result[index] = left[index] - right[index];
     }
     return result;
 }
 
-template<typename T, typename U, int dimensions>
+template<typename T, typename U, std::size_t dimensions>
 inline Vec<std::common_type_t<T, U>, dimensions> operator*(const Vec<T, dimensions>& left, const Vec<U, dimensions>& right)
 {
     Vec<std::common_type_t<T, U>, dimensions> result;
-    for (int index = 0; index < dimensions; ++index) {
+    for (std::size_t index = 0; index < dimensions; ++index) {
         result[index] = left[index] * right[index];
     }
     return result;
 }
 
-template<typename T, typename U, int dimensions>
+template<typename T, typename U, std::size_t dimensions>
 inline Vec<std::common_type_t<T, U>, dimensions> operator*(const Vec<T, dimensions>& vector, U scalar)
 {
     Vec<std::common_type_t<T, U>, dimensions> result;
-    for (int index = 0; index < dimensions; ++index) {
+    for (std::size_t index = 0; index < dimensions; ++index) {
         result[index] = vector[index] * scalar;
     }
     return result;
 }
 
-template<typename T, typename U, int dimensions>
+template<typename T, typename U, std::size_t dimensions>
 inline Vec<std::common_type_t<T, U>, dimensions> operator*(U scalar, const Vec<T, dimensions>& vector)
 {
     return vector * scalar;
 }
 
-template<typename T, typename U, int dimensions>
+template<typename T, typename U, std::size_t dimensions>
 inline Vec<std::common_type_t<T, U>, dimensions> operator/(const Vec<T, dimensions>& vector, U scalar)
 {
     Vec<std::common_type_t<T, U>, dimensions> result;
-    for (int index = 0; index < dimensions; ++index) {
+    for (std::size_t index = 0; index < dimensions; ++index) {
         result[index] = vector[index] / scalar;
     }
     return result;
 }
 
-template<typename T, typename U, int dimensions>
+template<typename T, typename U, std::size_t dimensions>
 inline std::common_type_t<T, U> dot(const Vec<T, dimensions>& left, const Vec<U, dimensions>& right)
 {
     std::common_type_t<T, U> result{};
-    for (int index = 0; index < dimensions; ++index) {
+    for (std::size_t index = 0; index < dimensions; ++index) {
         result += left[index] * right[index];
     }
     return result;
 }
 
-template<typename T, int dimensions>
+template<typename T, std::size_t dimensions>
 inline Vec<T, dimensions> unit_vector(const Vec<T, dimensions>& vector)
 {
     return vector / vector.length();

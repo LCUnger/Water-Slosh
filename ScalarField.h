@@ -18,11 +18,15 @@ class ScalarField
 public:
 	ScalarField() = default;
 
-	ScalarField(const ShapeType& shape, T cell_size = 1, std::size_t ghost_width = 1)
-		: cell_size_(cell_size), ghost_width_(std::max(ghost_width, std::size_t(1))), data_(shape + FieldType::index_extend, ghost_width_) {}
+	explicit ScalarField(const ShapeType& shape, T cell_size = 1, std::size_t ghost_width = 1)
+		: cell_size_(cell_size),
+		ghost_width_(std::max(ghost_width, std::size_t(1))),
+		data_(shape + FieldType::index_extend + ShapeType(ghost_width_)) {}
 
-	ScalarField(const ShapeType& shape, const T& initial_value, T cell_size = 1, std::size_t ghost_width = 1)
-		: cell_size_(cell_size), ghost_width_(std::max(ghost_width, std::size_t(1))), data_(shape, initial_value, ghost_width_) {}
+	explicit ScalarField(const ShapeType& shape, const T& initial_value, T cell_size = 1, std::size_t ghost_width = 1)
+		: cell_size_(cell_size),
+		ghost_width_(std::max(ghost_width, std::size_t(1))),
+		data_(shape + FieldType::index_extend + ShapeType(ghost_width_), initial_value) {}
 
 	//using DataType = decltype(make_data_type(std::make_index_sequence<dimensions>{}));
 

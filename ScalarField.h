@@ -24,12 +24,14 @@ public:
 	explicit ScalarField(const ShapeType& shape, T cell_size = 1, std::size_t ghost_width = 1)
 		: cell_size_(cell_size),
 		ghost_width_(std::max(ghost_width, std::size_t(1))),
-        data_(shape + FieldType::index_extend + ShapeType(2 * ghost_width_)) {}
+        physical_shape_(shape + FieldType::index_extend),
+        data_(physical_shape_ + ShapeType(2 * ghost_width_)) {}
 
 	explicit ScalarField(const ShapeType& shape, const T& initial_value, T cell_size = 1, std::size_t ghost_width = 1)
 		: cell_size_(cell_size),
 		ghost_width_(std::max(ghost_width, std::size_t(1))),
-        data_(shape + FieldType::index_extend + ShapeType(2 * ghost_width_), initial_value) {}
+        physical_shape_(shape + FieldType::index_extend),
+        data_(physical_shape_ + ShapeType(2 * ghost_width_), initial_value) {}
 
 
 	DataType& data() { return data_; }
@@ -103,6 +105,7 @@ public:
 private:
 	T cell_size_{ 1 };
 	std::size_t ghost_width_{ 1 };
+    ShapeType physical_shape_{};
   DataType data_;
 
 	

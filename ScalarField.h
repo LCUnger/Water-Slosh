@@ -165,10 +165,9 @@ public:
         return stencil;
     }
 
-    T interpolateLinear(const PointType& world_position, const StencilType& stencil_points) const
+    T interpolateLinear(const PointType& cell_position, const StencilType& stencil_points) const
     {
         WeightType weights{};
-        PointType cell_position = positionToCellposition(world_position);
         StencilType stencil_offsets = StencilOffsets();
 
         for (int i = 0; i < weights.size(); ++i) {

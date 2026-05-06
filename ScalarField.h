@@ -154,6 +154,20 @@ public:
         return T{};
     }
 
+    auto Stencil(const PointType& field_position) const
+    {
+        constexpr std::size_t num_stencil_points = std::size_t(1) << dimensions;
+        std::array<IndexType, num_stencil_points> stencil;
+        for (std::size_t i = 0; i < num_stencil_points; ++i) {
+            IndexType offset;
+            for (std::size_t axis = 0; axis < dimensions; ++axis) {
+                offset[axis] = (i & (std::size_t(1) << axis)) ? 1 : 0;
+            }
+            stencil[i] = positionToIndex(field_position) + offset;
+        }
+		return stencil;
+    }
+
 
 private:
     T cell_size_{ 1 };

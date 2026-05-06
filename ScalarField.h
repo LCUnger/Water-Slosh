@@ -195,9 +195,19 @@ public:
 
     //TODO : add sampling method with interpolation
     T sample(const PointType& world_position) const {
-        const auto field_position = world_position - FieldType::offset;
-        (void)field_position;
-        return T{};
+        StencilType stencil = interpolationStencil(world_position);
+        PointType cell_position = positionToCellposition(world_position);
+
+        // Check if all stencil points are stored in the grid, if not throw an exception (could be out of bounds or ghost cells)
+        for (const auto& index : stencil) {
+            if (!isStored(index)) {
+                throw std::out_of_range("Attempting to sample from an unstored position. If position should be in grid: check ghost cells");
+            }
+        }
+
+		T interprolated = interpolateLinear(cell_position, stencil);
+
+        return interprolated;
     }
 
 

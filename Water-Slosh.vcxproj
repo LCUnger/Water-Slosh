@@ -135,7 +135,6 @@
     <ClInclude Include="ArrayND.h" />
     <ClInclude Include="FieldTypes.h" />
     <ClInclude Include="FluidGrid.h" />
-    <ClInclude Include="Grid2D.h" />
     <ClInclude Include="Particle.h" />
     <ClInclude Include="Point.h" />
     <ClInclude Include="Point2.h" />

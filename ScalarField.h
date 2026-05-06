@@ -137,10 +137,10 @@ public:
         for (std::size_t axis = 0; axis < dimensions; ++axis) {
             index[axis] = static_cast<int>(std::floor(field_position[axis] / cell_size_));
         }
-		return index;
+        return index;
     }
 
-	PointType positionToCellposition(const PointType& world_position) const {
+    PointType positionToCellposition(const PointType& world_position) const {
         const PointType field_position = worldToField(world_position);
         PointType cell_position;
         for (std::size_t axis = 0; axis < dimensions; ++axis) {
@@ -178,7 +178,7 @@ public:
                     weights[i] *= (1 - cell_position[axis] / cell_size_);
                 }
             }
-    }
+        }
 
         T result{};
         T weight_sum{};
@@ -217,6 +217,11 @@ private:
     ShapeType physical_shape_{};
     DataType data_;
 
+    IndexType physicalToDataIndex(const IndexType& physical_index) const
+    {
+        return physical_index + IndexType(static_cast<int>(ghost_width_));
+    }
+
     static constexpr StencilType makeStencilOffsets()
     {
         constexpr std::size_t num_stencil_points = std::size_t(1) << dimensions;
@@ -228,22 +233,11 @@ private:
             }
             stencil[i] = offset;
         }
-		return stencil;
+        return stencil;
     }
 
     static constexpr StencilType stencil_offsets_ = makeStencilOffsets();
 
-    
-    IndexType physicalToDataIndex(const IndexType& physical_index) const
-    {
-        return physical_index + IndexType(static_cast<int>(ghost_width_));
-    }
-
-
-
-
-    
-    
 
     // TODO : Decide what to do regarding S field / active cells, and how to handle interpolation near boundaries (ghost cells)
 

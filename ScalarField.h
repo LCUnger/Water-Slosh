@@ -17,6 +17,7 @@ class ScalarField
     using ShapeType = Vec<std::size_t, dimensions>;
     using IndexType = Vec<int, dimensions>;
     using PointType = Point<T, dimensions>;
+    using StencilType = std::array<IndexType, std::size_t(1) << dimensions>;
 
 public:
     ScalarField() = default;
@@ -147,25 +148,15 @@ public:
         return cell_position;
     }
 
+    static constexpr StencilType StencilOffsets() {
+        return stencil_offsets_;
+    }
+
     //TODO : add sampling method with interpolation
     T sample(const PointType& world_position) const {
         const auto field_position = world_position - FieldType::offset;
         (void)field_position;
         return T{};
-    }
-
-    auto Stencil(const PointType& field_position) const
-    {
-        constexpr std::size_t num_stencil_points = std::size_t(1) << dimensions;
-        std::array<IndexType, num_stencil_points> stencil;
-        for (std::size_t i = 0; i < num_stencil_points; ++i) {
-            IndexType offset;
-            for (std::size_t axis = 0; axis < dimensions; ++axis) {
-                offset[axis] = (i & (std::size_t(1) << axis)) ? 1 : 0;
-            }
-            stencil[i] = positionToIndex(field_position) + offset;
-        }
-		return stencil;
     }
 
 
@@ -175,12 +166,33 @@ private:
     ShapeType physical_shape_{};
     DataType data_;
 
+    static constexpr StencilType makeStencilOffsets()
+    {
+        constexpr std::size_t num_stencil_points = std::size_t(1) << dimensions;
+        StencilType stencil;
+        for (std::size_t i = 0; i < num_stencil_points; ++i) {
+            IndexType offset;
+            for (std::size_t axis = 0; axis < dimensions; ++axis) {
+                offset[axis] = (i & (std::size_t(1) << axis)) ? 1 : 0;
+            }
+            stencil[i] = offset;
+        }
+		return stencil;
+    }
+
+    static constexpr StencilType stencil_offsets_ = makeStencilOffsets();
+
     
     IndexType physicalToDataIndex(const IndexType& physical_index) const
     {
         return physical_index + IndexType(static_cast<int>(ghost_width_));
     }
 
+
+
+
+    
+    
 
     // TODO : Decide what to do regarding S field / active cells, and how to handle interpolation near boundaries (ghost cells)
 

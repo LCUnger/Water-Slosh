@@ -18,6 +18,7 @@ class ScalarField
     using IndexType = Vec<int, dimensions>;
     using PointType = Point<T, dimensions>;
     using StencilType = std::array<IndexType, std::size_t(1) << dimensions>;
+    using WeightType = std::array<T, std::size_t(1) << dimensions>;
 
 public:
     ScalarField() = default;
@@ -150,6 +151,47 @@ public:
 
     static constexpr StencilType StencilOffsets() {
         return stencil_offsets_;
+    }
+
+    StencilType interpolationStencil(const PointType& world_position) const
+    {
+        constexpr std::size_t num_stencil_points = std::size_t(1) << dimensions;
+        const StencilType stencil_offsets = StencilOffsets();
+
+        StencilType stencil;
+        for (std::size_t i = 0; i < num_stencil_points; ++i) {
+            stencil[i] = positionToIndex(world_position) + stencil_offsets[i];
+        }
+        return stencil;
+    }
+
+    T interpolateLinear(const PointType& world_position, const StencilType& stencil_points) const
+    {
+        WeightType weights{};
+        PointType cell_position = positionToCellposition(world_position);
+        StencilType stencil_offsets = StencilOffsets();
+
+        for (int i = 0; i < weights.size(); ++i) {
+            for (std::size_t axis = 0; axis < dimensions; ++axis) {
+                if (stencil_offsets[i][axis] == 1) {
+                    weights[i] *= (cell_position[axis] / cell_size_);
+                } else {
+                    weights[i] *= (1 - cell_position[axis] / cell_size_);
+                }
+            }
+    }
+
+        T result{};
+        T weight_sum{};
+
+        for (std::size_t i = 0; i < weights.size(); ++i) {
+            result += (*this)(stencil_points[i]) * weights[i];
+            weight_sum += weights[i];
+        }
+
+        result /= weight_sum;
+
+        return result;
     }
 
     //TODO : add sampling method with interpolation

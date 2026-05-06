@@ -311,8 +311,8 @@ void testPointVecOps()
 
 void testFieldTypes()
 {
-    using toolbox::CellCentered;
-    using toolbox::FaceCentered;
+    using toolbox::fieldtypes::CellCentered;
+    using toolbox::fieldtypes::FaceCentered;
     using Cell3 = CellCentered<double, 3>;
     using FaceY3 = FaceCentered<double, 3, 1>;
 
@@ -331,8 +331,8 @@ void testFieldTypes()
 
 void testScalarFieldIndexBounds()
 {
-    using CellField = toolbox::ScalarField<double, 2, toolbox::CellCentered<double, 2>>;
-    using FaceYField = toolbox::ScalarField<double, 2, toolbox::FaceCentered<double, 2, 1>>;
+    using CellField = toolbox::ScalarField<double, 2, toolbox::fieldtypes::CellCentered<double, 2>>;
+    using FaceYField = toolbox::ScalarField<double, 2, toolbox::fieldtypes::FaceCentered<double, 2, 1>>;
     using Index = toolbox::Vec<int, 2>;
     using Shape = toolbox::Vec<std::size_t, 2>;
 

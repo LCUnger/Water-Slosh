@@ -18,7 +18,7 @@ class ScalarField
     using IndexType = Vec<int, dimensions>;
     using PointType = Point<T, dimensions>;
     using StencilType = std::array<IndexType, std::size_t(1) << dimensions>;
-    using WeightType = std::array<T, std::size_t(1) << dimensions>;
+    using WeightsType = std::array<T, std::size_t(1) << dimensions>;
 
 public:
     ScalarField() = default;
@@ -165,20 +165,30 @@ public:
         return stencil;
     }
 
-    T interpolateLinear(const PointType& cell_position, const StencilType& stencil_points) const
+    WeightsType interpolationLinearWeights(const PointType& cell_position)
     {
-        WeightType weights{};
+        WeightsType weights{};
+
         StencilType stencil_offsets = StencilOffsets();
 
         for (int i = 0; i < weights.size(); ++i) {
             for (std::size_t axis = 0; axis < dimensions; ++axis) {
                 if (stencil_offsets[i][axis] == 1) {
                     weights[i] *= (cell_position[axis] / cell_size_);
-                } else {
+                }
+                else {
                     weights[i] *= (1 - cell_position[axis] / cell_size_);
                 }
             }
         }
+
+        return weights;
+
+    }
+
+    T interpolateLinear(const PointType& cell_position, const StencilType& stencil_points) const
+    {
+        WeightsType weights =  interpolationLinearWeights(cell_position);
 
         T result{};
         T weight_sum{};

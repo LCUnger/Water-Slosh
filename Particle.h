@@ -21,6 +21,11 @@ public:
         position_ += velocity_ * dt;
     }
 
+    void update(float dt, const Vec2& acceleration)
+    {
+        integrate(dt, acceleration);
+	}
+
 	Point2& position() { return position_; }
 	const Point2& position() const { return position_; }
 

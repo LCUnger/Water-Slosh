@@ -4,9 +4,15 @@
 
 #include "World.h"
 
+struct WindowConfig
+{
+    unsigned int width_px = 800;
+    unsigned int height_px = 600;
+};
+
 int main()
 {
-    const unsigned int width = 800;
+    const WindowConfig window_config;
     const unsigned int height = 600;
 	const unsigned int num_particles = 1000;
     const RenderConfig render_config{

@@ -85,7 +85,7 @@ public:
     {
         // TODO : Iterations
         for (size_t x = 0; x < field_width_; ++x) {
-            for (size_t y = 0; y < field_heigth_; ++y) {
+            for (size_t y = 0; y < field_height_; ++y) {
                 if (!forceIncompressibilityAtCell(x, y)) continue;
             }
         }
@@ -113,7 +113,7 @@ private:
     ScalarField<int, 2, fieldtypes::CellCentered<int, 2>> cell_type_;
 
     size_t field_width_;
-    size_t field_heigth_;
+    size_t field_height_;
 
     // TODO : Add overrelaxation
     bool forceIncompressibilityAtCell(size_t idx_x, size_t idx_y)

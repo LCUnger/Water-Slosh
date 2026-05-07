@@ -73,6 +73,9 @@
     <ClInclude Include="ParticleRenderer.h">
       <Filter>Source Files\render</Filter>
     </ClInclude>
+    <ClInclude Include="RenderTransform.h">
+      <Filter>Source Files\render</Filter>
+    </ClInclude>
     <ClInclude Include="World.h">
       <Filter>Source Files\sim</Filter>
     </ClInclude>

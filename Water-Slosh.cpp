@@ -14,29 +14,25 @@ struct WindowConfig
 int main()
 {
     const WindowConfig window_config;
-
-
     const SimulationConfig simulation_config{
         .num_particles = 1000,
         .grid_width = 100,
         .grid_height = 60,
         .cell_size_m = 0.05
     };
-
-    const float pixels_per_meter = std::min(
-        static_cast<float>(window_config.width_px / simulation_config.domain_width_m()),
-        static_cast<float>(window_config.height_px / simulation_config.domain_height_m())
-    );
-
     const RenderConfig render_config{
-        .particle_radius_px = 2.0f,
-        .pixels_per_meter = pixels_per_meter
+        .particle_radius_px = 2.0f
     };
 
-	World world(simulation_config);
+    World world(simulation_config);
     ParticleRenderer particle_renderer(render_config);
 
     sf::RenderWindow window(sf::VideoMode({ window_config.width_px, window_config.height_px }), "SFML 3 Test Render");
+    const RenderTransform render_transform = RenderTransform::fit_to_target(
+        world.config().domain_width_m(),
+        world.config().domain_height_m(),
+        window.getSize()
+    );
 
     sf::Image image({ window_config.width_px, window_config.height_px }, sf::Color::Black);
 
@@ -82,7 +78,7 @@ int main()
 
         window.clear();
         window.draw(sprite);
-        particle_renderer.draw(window, world.particles());
+        particle_renderer.draw(window, world.particles(), render_transform);
         window.display();
     }
 }

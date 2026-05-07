@@ -8,37 +8,37 @@
 
 struct SimulationConfig
 {
-	std::size_t num_particles = 1000;
-	std::size_t grid_width = 100;
-	std::size_t grid_height = 60;
-	double cell_size_m = 0.05;
+    std::size_t num_particles = 1000;
+    std::size_t grid_width = 100;
+    std::size_t grid_height = 60;
+    double cell_size_m = 0.05;
 
-	double domain_width_m() const
-	{
-		return static_cast<double>(grid_width) * cell_size_m;
-	}
+    double domain_width_m() const
+    {
+        return static_cast<double>(grid_width) * cell_size_m;
+    }
 
-	double domain_height_m() const
-	{
-		return static_cast<double>(grid_height) * cell_size_m;
-	}
+    double domain_height_m() const
+    {
+        return static_cast<double>(grid_height) * cell_size_m;
+    }
 };
 
 class World
 {
 public:
-	explicit World(const SimulationConfig& config)
-		: config_(config),
-		  particles_(config.num_particles),
-		  fluid_grid_(config.grid_width, config.grid_height, config.cell_size_m)
-	{
-		fluid_grid_.initialize();
-	}
+    explicit World(const SimulationConfig& config)
+        : config_(config),
+          particles_(config.num_particles),
+          fluid_grid_(config.grid_width, config.grid_height, config.cell_size_m)
+    {
+        fluid_grid_.initialize();
+    }
 
-	explicit World(std::size_t num_particles, std::size_t grid_width, std::size_t grid_height, double cell_size_m)
-		: World(SimulationConfig{ num_particles, grid_width, grid_height, cell_size_m })
-	{
-	}
+    explicit World(std::size_t num_particles, std::size_t grid_width, std::size_t grid_height, double cell_size_m)
+        : World(SimulationConfig{ num_particles, grid_width, grid_height, cell_size_m })
+    {
+    }
 
     void update(float dt)
     {
@@ -55,17 +55,22 @@ public:
 		// transfer velocity from grid to particles
     }
 
-	const SimulationConfig& config() const { return config_; }
+    void add_particle(const Particle& particle)
+    {
+        particles_.push_back(particle);
+	}
 
-	std::vector<Particle>& particles() { return particles_; }
-	const std::vector<Particle>& particles() const { return particles_; }
+    const SimulationConfig& config() const { return config_; }
 
-	FluidGrid<double>& fluid_grid() { return fluid_grid_; }
-	const FluidGrid<double>& fluid_grid() const { return fluid_grid_; }
+    std::vector<Particle>& particles() { return particles_; }
+    const std::vector<Particle>& particles() const { return particles_; }
+
+    FluidGrid<double>& fluid_grid() { return fluid_grid_; }
+    const FluidGrid<double>& fluid_grid() const { return fluid_grid_; }
 
 private:
-	SimulationConfig config_;
-	std::vector<Particle> particles_;
-	FluidGrid<double> fluid_grid_;
+    SimulationConfig config_;
+    std::vector<Particle> particles_;
+    FluidGrid<double> fluid_grid_;
 };
 

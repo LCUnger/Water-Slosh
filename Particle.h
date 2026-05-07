@@ -9,7 +9,7 @@ class Particle
 public:
     Particle() : position_{}, velocity_{} {}
     Particle(float position_x, float position_y, float velocity_x, float velocity_y) : position_{ position_x, position_y }, velocity_{ velocity_x, velocity_y } {}
-
+	Particle(const Point2& position, const Vec2& velocity) : position_(position), velocity_(velocity) {}
 
     /** 
     Integrate/update the particle's position and velocity over time dt, given an acceleration.

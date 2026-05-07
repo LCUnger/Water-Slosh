@@ -42,10 +42,17 @@ public:
 
 	void update(float dt) {}
 
+	const SimulationConfig& config() const { return config_; }
+
+	std::vector<Particle>& particles() { return particles_; }
+	const std::vector<Particle>& particles() const { return particles_; }
+
+	FluidGrid<double>& fluid_grid() { return fluid_grid_; }
+	const FluidGrid<double>& fluid_grid() const { return fluid_grid_; }
+
 private:
+	SimulationConfig config_;
 	std::vector<Particle> particles_;
 	FluidGrid<double> fluid_grid_;
-
-
 };
 

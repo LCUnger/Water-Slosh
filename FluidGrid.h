@@ -68,11 +68,13 @@ template<typename T>
 class FluidGrid
 {
 public:
-    explicit FluidGrid(size_t width, size_t height)
-        : field_width_(width), field_height_(height),
-          u_(width, height), v_(width, height),
-          presure_(width, height), density_(width, height),
-          cell_type_(width, height)
+    explicit FluidGrid(std::size_t width, std::size_t height, T cell_size)
+        : field_width_(width), field_height_(height), cell_size_(cell_size),
+          u_(ShapeType{ width, height }, cell_size, std::size_t{ 1 }),
+          v_(ShapeType{ width, height }, cell_size, std::size_t{ 1 }),
+          pressure_(ShapeType{ width, height }, cell_size, std::size_t{ 1 }),
+          density_(ShapeType{ width, height }, cell_size, std::size_t{ 1 }),
+          cell_type_(ShapeType{ width, height })
     {
     }
     //TODO : think about how to chose size of the field. 

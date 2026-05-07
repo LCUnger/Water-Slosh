@@ -2,13 +2,17 @@
 #include <cmath>
 #include <cstdint>
 
-#include "FieldTypes.h"
-#include "Tensor.h"
+#include "World.h"
 
 int main()
 {
     const unsigned int width = 800;
     const unsigned int height = 600;
+	const unsigned int num_particles = 1000;
+
+
+	World world(num_particles, width, height);
+
 
     sf::RenderWindow window(sf::VideoMode({ width, height }), "SFML 3 Test Render");
 

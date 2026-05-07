@@ -62,7 +62,7 @@ enum class CellType
     // Gas = -1
 };
 
-
+template<typename T>
 class FluidGrid
 {
 public:
@@ -106,10 +106,10 @@ public:
     
 
 private:
-    ScalarField<double, 2, fieldtypes::FaceCentered<double, 2, 0>> u_; // Velocity component in x-direction
-    ScalarField<double, 2, fieldtypes::FaceCentered<double, 2, 1>> v_; // Velocity component in y-direction
-    ScalarField<double, 2, fieldtypes::CellCentered<double, 2>> presure_;
-    ScalarField<double, 2, fieldtypes::CellCentered<double, 2>> density_;
+    ScalarField<T, 2, fieldtypes::FaceCentered<T, 2, 0>> u_; // Velocity component in x-direction
+    ScalarField<T, 2, fieldtypes::FaceCentered<T, 2, 1>> v_; // Velocity component in y-direction
+    ScalarField<T, 2, fieldtypes::CellCentered<T, 2>> presure_;
+    ScalarField<T, 2, fieldtypes::CellCentered<T, 2>> density_;
     ScalarField<int, 2, fieldtypes::CellCentered<int, 2>> cell_type_;
 
     size_t field_width_;

@@ -22,6 +22,13 @@ public:
 	}
 
 private:
+	sf::Vector2f world_to_screen(const Point2& world_position, float target_height) const
+	{
+		return {
+			static_cast<float>(world_position[0] * pixels_per_unit_),
+			target_height - static_cast<float>(world_position[1] * pixels_per_unit_)
+		};
+	}
 
 	float radius_{};
 	float pixels_per_unit_{};

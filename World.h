@@ -40,7 +40,20 @@ public:
 	{
 	}
 
-	void update(float dt) {}
+    void update(float dt)
+    {
+        for (auto& particle : particles_) {
+            particle.update(dt, Vec2{ 0 , -9.81 }); // TODO : Add external forces like gravity
+		}
+
+        // update particles
+        
+		// transfer velocity from particles to grid
+
+		// enforce incompressibility on grid
+
+		// transfer velocity from grid to particles
+    }
 
 	const SimulationConfig& config() const { return config_; }
 

@@ -18,7 +18,16 @@ public:
 		circle_.setFillColor(color_);
 	}
 
-		
+
+	void draw(sf::RenderTarget& target, const std::vector<Particle>& particles)
+	{
+		const float target_height = static_cast<float>(target.getSize().y);
+
+		for (const auto& particle : particles) 
+		{
+			circle_.setPosition(world_to_screen(particle.position(), target_height));
+			target.draw(circle_);
+		}
 	}
 
 private:

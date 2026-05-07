@@ -66,7 +66,14 @@ template<typename T>
 class FluidGrid
 {
 public:
-
+    explicit FluidGrid(size_t width, size_t height)
+        : field_width_(width), field_height_(height),
+          u_(width, height), v_(width, height),
+          presure_(width, height), density_(width, height),
+          cell_type_(width, height)
+    {
+    }
+    //TODO : think about how to chose size of the field. 
 
     void initialize() {};
 

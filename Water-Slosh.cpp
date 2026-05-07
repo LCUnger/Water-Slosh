@@ -13,8 +13,12 @@ struct WindowConfig
 int main()
 {
     const WindowConfig window_config;
-    const unsigned int height = 600;
-	const unsigned int num_particles = 1000;
+    const SimulationConfig simulation_config{
+        .num_particles = 1000,
+        .grid_width = 100,
+        .grid_height = 60,
+        .cell_size_m = 0.05
+    };
     const RenderConfig render_config{
         .particle_radius_px = 2.0f,
         .pixels_per_meter = 100.0f

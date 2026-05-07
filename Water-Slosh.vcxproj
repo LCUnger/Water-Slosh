@@ -130,6 +130,7 @@
     <ClCompile Include="FluidGrid.cpp" />
     <ClCompile Include="PointVecOps.h" />
     <ClCompile Include="Water-Slosh.cpp" />
+    <ClCompile Include="World.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArrayND.h" />
@@ -143,6 +144,7 @@
     <ClInclude Include="Tensor.h" />
     <ClInclude Include="Vec.h" />
     <ClInclude Include="Vec2.h" />
+    <ClInclude Include="World.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".github\copilot-instructions.md" />

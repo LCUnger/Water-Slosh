@@ -74,7 +74,7 @@ public:
     void setCellTypeMask() {};
 
 
-    void forceIncompressibility() 
+    void forceIncompressibility()
        /** HACK: Currently using Gauss Sidel, which has directional bias.This is a very naive implementation of enforcing incompressibility, we will need to solve a Poisson equation for the pressure field to get the correct velocity correction.
         Improvement options in order of increasing complexity:
         1. Gauss Sidel with red-black ordering to remove directional bias.
@@ -93,8 +93,10 @@ public:
     }
 
 
-    void particleToGrid() {};
-
+    void transferVelocityParticleToGrid()
+    {
+     
+    }
 
 
     void transferVelocityGridToParticle(Particle& particle)

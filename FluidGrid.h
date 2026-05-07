@@ -77,7 +77,12 @@ public:
           cell_type_(ShapeType{ width, height })
     {
     }
-    //TODO : think about how to chose size of the field. 
+
+    std::size_t width() const { return field_width_; }
+    std::size_t height() const { return field_height_; }
+    T cell_size() const { return cell_size_; }
+    T physical_width() const { return static_cast<T>(field_width_) * cell_size_; }
+    T physical_height() const { return static_cast<T>(field_height_) * cell_size_; }
 
     void initialize() {};
 
@@ -112,7 +117,7 @@ public:
 
     void transferVelocityGridToParticle(Particle& particle)
     {
-		particle.velocity() = Vec2{ u_.sample(particle.position()), v_.sample(particle.position()) };
+        particle.velocity() = Vec2{ u_.sample(particle.position()), v_.sample(particle.position()) };
     }
     
 
@@ -139,10 +144,10 @@ private:
 
         if (s == 0) return false; // All cells around are solid, skip
 
-		u_(idx_x, idx_y) += divergence * (cell_type_(idx_x - 1, idx_y) / s);
-		u_(idx_x + 1, idx_y) +=  -divergence * (cell_type_(idx_x + 1, idx_y) / s);
-		v_(idx_x, idx_y) += divergence * (cell_type_(idx_x, idx_y - 1) / s);
-		v_(idx_x, idx_y + 1) += -divergence * (cell_type_(idx_x, idx_y + 1) / s);
+        u_(idx_x, idx_y) += divergence * (cell_type_(idx_x - 1, idx_y) / s);
+        u_(idx_x + 1, idx_y) +=  -divergence * (cell_type_(idx_x + 1, idx_y) / s);
+        v_(idx_x, idx_y) += divergence * (cell_type_(idx_x, idx_y - 1) / s);
+        v_(idx_x, idx_y + 1) += -divergence * (cell_type_(idx_x, idx_y + 1) / s);
 
         return true;
     }

@@ -9,7 +9,13 @@ int main()
     const unsigned int width = 800;
     const unsigned int height = 600;
 	const unsigned int num_particles = 1000;
+    const RenderConfig render_config{
+        .particle_radius_px = 2.0f,
+        .pixels_per_meter = 100.0f
+    };
 
+	World world(simulation_config);
+    ParticleRenderer particle_renderer(render_config);
 
 	World world(num_particles, width, height);
 

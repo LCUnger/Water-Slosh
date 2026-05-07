@@ -86,15 +86,7 @@ public:
         // TODO : Iterations
         for (size_t x = 0; x < field_width_; ++x) {
             for (size_t y = 0; y < field_heigth_; ++y) {
-                double divergence = u_(x + 1, y) - u_(x, y) + v_(x, y + 1) - v_(x, y);
-
-                //HACK : find a good name for this variable.
-                int s = cell_type_(x+1,y) + cell_type_(x-1,y) + cell_type_(x,y+1) + cell_type_(x,y-1);
-                if (s == 0) continue; // All cells around are solid, skip
-
-
-
-
+                if (!forceIncompressibilityAtCell(x, y)) continue;
             }
         }
 
@@ -116,6 +108,24 @@ private:
 
     size_t field_width_;
     size_t field_heigth_;
+
+    // TODO : Add overrelaxation
+    bool forceIncompressibilityAtCell(size_t idx_x, size_t idx_y)
+    {
+        T divergence = u_(idx_x + 1, idx_y) - u_(idx_x, idx_y) + v_(idx_x, idx_y + 1) - v_(idx_x, idx_y);
+
+        //HACK : find a good name for this variable.
+        int s = cell_type_(idx_x + 1, idx_y) + cell_type_(idx_x - 1, idx_y) + cell_type_(idx_x, idx_y + 1) + cell_type_(idx_x, idx_y - 1);
+
+        if (s == 0) return false; // All cells around are solid, skip
+
+		u_(idx_x, idx_y) += divergence * (cell_type_(idx_x - 1, idx_y) / s);
+		u_(idx_x + 1, idx_y) +=  -divergence * (cell_type_(idx_x + 1, idx_y) / s);
+		v_(idx_x, idx_y) += divergence * (cell_type_(idx_x, idx_y - 1) / s);
+		v_(idx_x, idx_y + 1) += -divergence * (cell_type_(idx_x, idx_y + 1) / s);
+
+        return true;
+    }
 
 };
 

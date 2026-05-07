@@ -35,9 +35,9 @@ int main()
     sf::Image image({ width, height }, sf::Color::Black);
 
     // Render once, like a ray tracer frame
-    for (unsigned int y = 0; y < height; ++y)
+    for (unsigned int y = 0; y < window_config.height_px; ++y)
     {
-        for (unsigned int x = 0; x < width; ++x)
+        for (unsigned int x = 0; x < window_config.width_px; ++x)
         {
             float texture_u = static_cast<float>(x) / static_cast<float>(width);
             float texture_v = static_cast<float>(y) / static_cast<float>(height);
@@ -46,8 +46,8 @@ int main()
             std::uint8_t green = static_cast<std::uint8_t>(255 * texture_v);
             std::uint8_t blue = 100;
 
-            float center_x = width / 2.0f;
-            float center_y = height / 2.0f;
+            float center_x = window_config.width_px / 2.0f;
+            float center_y = window_config.height_px / 2.0f;
             float delta_x = static_cast<float>(x) - center_x;
             float delta_y = static_cast<float>(y) - center_y;
             float distance = std::sqrt(delta_x * delta_x + delta_y * delta_y);

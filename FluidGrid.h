@@ -73,13 +73,15 @@ public:
 
     void setCellTypeMask() {};
 
-    // HACK : Currently using Gauss Sidel, which has directional bias. This is a very naive implementation of enforcing incompressibility, we will need to solve a Poisson equation for the pressure field to get the correct velocity correction.
-    // Improvement options in order of increasing complexity:
-    // 1. Gauss Sidel with red-black ordering to remove directional bias.
-    // 2. Jacobi method to remove directional bias, but slower convergence.
-    // 3. Conjugate gradient method to solve the Poisson equation for the pressure field, which will give us the correct velocity correction in one step, but is more complex to implement.
-    // Note : we can also consider using a multigrid method to solve the Poisson equation, which will give us even faster convergence, but is even more complex to implement.
+
     void forceIncompressibility() 
+       /** HACK: Currently using Gauss Sidel, which has directional bias.This is a very naive implementation of enforcing incompressibility, we will need to solve a Poisson equation for the pressure field to get the correct velocity correction.
+        Improvement options in order of increasing complexity:
+        1. Gauss Sidel with red-black ordering to remove directional bias.
+        2. Jacobi method to remove directional bias, but slower convergence.
+        3. Conjugate gradient method to solve the Poisson equation for the pressure field, which will give us the correct velocity correction in one step, but is more complex to implement.
+        Note : we can also consider using a multigrid method to solve the Poisson equation, which will give us even faster convergence, but is even more complex to implement.
+        */
     {
         // TODO : Iterations
         for (size_t x = 0; x < field_width_; ++x) {

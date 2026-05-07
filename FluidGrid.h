@@ -53,6 +53,8 @@ s(i, j + 1) = top neighbor
 #include "FieldTypes.h"
 #include "Particle.h"
 
+#include <cstddef>
+
 using namespace toolbox;
 
 enum class CellType
@@ -91,8 +93,8 @@ public:
         */
     {
         // TODO : Iterations
-        for (size_t x = 0; x < field_width_; ++x) {
-            for (size_t y = 0; y < field_height_; ++y) {
+        for (std::size_t x = 0; x < field_width_; ++x) {
+            for (std::size_t y = 0; y < field_height_; ++y) {
                 if (!forceIncompressibilityAtCell(x, y)) continue;
             }
         }
@@ -113,17 +115,20 @@ public:
     
 
 private:
+    using ShapeType = Vec<std::size_t, 2>;
+
     ScalarField<T, 2, fieldtypes::FaceCentered<T, 2, 0>> u_; // Velocity component in x-direction
     ScalarField<T, 2, fieldtypes::FaceCentered<T, 2, 1>> v_; // Velocity component in y-direction
-    ScalarField<T, 2, fieldtypes::CellCentered<T, 2>> presure_;
+    ScalarField<T, 2, fieldtypes::CellCentered<T, 2>> pressure_;
     ScalarField<T, 2, fieldtypes::CellCentered<T, 2>> density_;
     ScalarField<int, 2, fieldtypes::CellCentered<int, 2>> cell_type_;
 
-    size_t field_width_;
-    size_t field_height_;
+    std::size_t field_width_;
+    std::size_t field_height_;
+    T cell_size_;
 
     // TODO : Add overrelaxation
-    bool forceIncompressibilityAtCell(size_t idx_x, size_t idx_y)
+    bool forceIncompressibilityAtCell(std::size_t idx_x, std::size_t idx_y)
     {
         T divergence = u_(idx_x + 1, idx_y) - u_(idx_x, idx_y) + v_(idx_x, idx_y + 1) - v_(idx_x, idx_y);
 

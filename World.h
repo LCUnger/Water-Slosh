@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <vector>
 
 #include "Particle.h"
@@ -26,12 +27,18 @@ struct SimulationConfig
 class World
 {
 public:
-	World(size_t num_particles, size_t grid_width, size_t grid_height)
-		: particles_(num_particles), fluid_grid_(grid_width, grid_height)
+	explicit World(const SimulationConfig& config)
+		: config_(config),
+		  particles_(config.num_particles),
+		  fluid_grid_(config.grid_width, config.grid_height, config.cell_size_m)
 	{
 		fluid_grid_.initialize();
 	}
 
+	explicit World(std::size_t num_particles, std::size_t grid_width, std::size_t grid_height, double cell_size_m)
+		: World(SimulationConfig{ num_particles, grid_width, grid_height, cell_size_m })
+	{
+	}
 
 	void update(float dt) {}
 

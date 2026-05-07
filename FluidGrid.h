@@ -96,7 +96,11 @@ public:
     void particleToGrid() {};
 
 
-    Particle gridToParticle() {};
+
+    void transferVelocityGridToParticle(Particle& particle)
+    {
+		particle.velocity() = Vec2{ u_.sample(particle.position()), v_.sample(particle.position()) };
+    }
     
 
 private:

@@ -48,10 +48,8 @@ public:
             particle.update(dt, gravity);
 		}
 
-        // update particles
+        // TODO: transfer velocity from particles to grid
         
-		// transfer velocity from particles to grid
-
 		// enforce incompressibility on grid
 
 		// transfer velocity from grid to particles

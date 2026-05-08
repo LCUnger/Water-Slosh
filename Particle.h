@@ -31,9 +31,9 @@ public:
         position_ += velocity_ * dt;
     }
 
-    void update(float dt, const Vec2& acceleration)
+    void update(float dt, const Vec2& acceleration, const Vec2& external_forces = Vec2{0,0})
     {
-        integrate(dt, acceleration);
+        integrate(dt, acceleration, external_forces);
     }
 
     Point2& position() { return position_; }

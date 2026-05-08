@@ -12,6 +12,7 @@ struct SimulationConfig
     std::size_t grid_width = 100;
     std::size_t grid_height = 60;
     double cell_size_m = 0.05;
+    double particle_radius_m = 0.02;
 
     double domain_width_m() const
     {
@@ -30,13 +31,14 @@ public:
     explicit World(const SimulationConfig& config)
         : config_(config),
           particles_(config.num_particles),
-          fluid_grid_(config.grid_width, config.grid_height, config.cell_size_m)
+          fluid_grid_(config.grid_width, config.grid_height, config.cell_size_m),
+          particle_radius_m_(config.particle_radius_m)
     {
         fluid_grid_.initialize();
     }
 
-    explicit World(std::size_t num_particles, std::size_t grid_width, std::size_t grid_height, double cell_size_m)
-        : World(SimulationConfig{ num_particles, grid_width, grid_height, cell_size_m })
+    explicit World(std::size_t num_particles, std::size_t grid_width, std::size_t grid_height, double cell_size_m, double particle_radius_m)
+        : World(SimulationConfig{ num_particles, grid_width, grid_height, cell_size_m, particle_radius_m })
     {
     }
 
@@ -72,6 +74,8 @@ private:
     SimulationConfig config_;
     std::vector<Particle> particles_;
     FluidGrid<double> fluid_grid_;
+	double particle_radius_m_ = 0.02;
+
     static constexpr Vec2 gravity{ 0 , -9.81 };
 };
 

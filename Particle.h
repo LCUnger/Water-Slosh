@@ -4,12 +4,13 @@
 #include "Vec2.h"
 #include "PointVecOps.h"
 
+
 class Particle
 {
 public:
-    Particle() : position_{}, velocity_{} {}
-    Particle(float position_x, float position_y, float velocity_x, float velocity_y) : position_{ position_x, position_y }, velocity_{ velocity_x, velocity_y } {}
-	Particle(const Point2& position, const Vec2& velocity) : position_(position), velocity_(velocity) {}
+    Particle() : position_{}, velocity_{}, radius_{} {}
+    Particle(float position_x, float position_y, float velocity_x, float velocity_y, double radius) : position_{ position_x, position_y }, velocity_{ velocity_x, velocity_y }, radius_{ radius } {}
+	Particle(const Point2& position, const Vec2& velocity, double radius) : position_(position), velocity_(velocity), radius_(radius) {}
 
     /** 
     Integrate/update the particle's position and velocity over time dt, given an acceleration.
@@ -36,4 +37,5 @@ public:
 private:
     Point2 position_{};
     Vec2 velocity_{};
+    double radius_{};
 };

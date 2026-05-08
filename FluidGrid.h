@@ -68,7 +68,7 @@ template<typename T>
 class FluidGrid
 {
 public:
-    explicit FluidGrid(std::size_t width, std::size_t height, T cell_size)
+    FluidGrid(std::size_t width, std::size_t height, T cell_size)
         : field_width_(width), field_height_(height), cell_size_(cell_size),
           u_(ShapeType{ width, height }, cell_size, std::size_t{ 1 }),
           v_(ShapeType{ width, height }, cell_size, std::size_t{ 1 }),

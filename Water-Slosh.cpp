@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 #include <cmath>
 #include <cstdint>
+#include <algorithm>
 
 #include "ParticleRenderer.h"
 #include "World.h"
@@ -52,9 +53,9 @@ int main()
 
     while (window.isOpen())
     {
-        const double dt = clock.restart().asSeconds();
+        const float dt = std::min(clock.restart().asSeconds(), 0.033f);
 
-        world.update(dt);
+        world.update(static_cast<double>(dt));
         
         while (auto event = window.pollEvent())
         {

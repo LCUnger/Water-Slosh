@@ -1,5 +1,9 @@
 #pragma once
 
+#include <numbers>
+#include <cmath>
+
+
 #include "Point2.h"
 #include "Vec2.h"
 #include "PointVecOps.h"
@@ -9,8 +13,8 @@ class Particle
 {
 public:
     Particle() : position_{}, velocity_{}, radius_{}, mass_{} {}
-    Particle(float position_x, float position_y, float velocity_x, float velocity_y, double radius, double mass) : position_{ position_x, position_y }, velocity_{ velocity_x, velocity_y }, radius_{ radius }, mass_{ mass } {}
-	Particle(const Point2& position, const Vec2& velocity, double radius, double mass) : position_(position), velocity_(velocity), radius_(radius), mass_(mass) {}
+    Particle(float position_x, float position_y, float velocity_x, float velocity_y, double radius) : position_{ position_x, position_y }, velocity_{ velocity_x, velocity_y }, radius_{ radius }, mass_{ 4.0 / 3.0 * std::numbers::pi * std::pow(radius, 3) * 997 } {}
+	Particle(const Point2& position, const Vec2& velocity, double radius) : position_(position), velocity_(velocity), radius_(radius), mass_(4.0 / 3.0 * std::numbers::pi * std::pow(radius, 3) * 997) {}
 
     /** 
     Integrate/update the particle's position and velocity over time dt, given an acceleration.
@@ -32,6 +36,8 @@ public:
 
 	Vec2& velocity() { return velocity_; }
     const Vec2& velocity() const { return velocity_; }
+
+	double radius() const { return radius_; }
 
 
 private:

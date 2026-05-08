@@ -30,7 +30,6 @@ class World
 public:
     explicit World(const SimulationConfig& config)
         : config_(config),
-          particles_(config.num_particles),
           fluid_grid_(config.grid_width, config.grid_height, config.cell_size_m),
           particle_radius_m_(config.particle_radius_m)
     {
@@ -46,8 +45,8 @@ public:
     void update(float dt)
     {
         for (auto& particle : particles_) {
-            particle.update(dt, gravity);
-			resolveParticleCollision(particle);
+            particle.update(dt, gravity, groundForce(particle));
+            resolveParticleCollision(particle);
         }
 
 
@@ -80,6 +79,13 @@ private:
 
     static constexpr Vec2 gravity{ 0 , -9.81 };
 
+    Vec2 groundForce(const Particle& particle) const
+    {
+		if (particle.position()[1] - particle.radius() < 1e-4) {
+            return Vec2{ 0, -gravity[1] * particle.mass()};
+        }
+        return Vec2{ 0 , 0 };
+    }
 
     // Currently just simple reflection at boundaries
     void resolveParticleCollision(Particle& particle) const
@@ -112,7 +118,7 @@ private:
             particle.position()[0] = x_min + (x_min - particle.position()[0]);
             if (particle.velocity()[0] < 0.0) {
                 particle.velocity()[0] *= -damping_factor;
-        }
+            }
         }
         else if (particle.position()[0] > x_max) {
             particle.position()[0] = x_max - (particle.position()[0] - x_max);

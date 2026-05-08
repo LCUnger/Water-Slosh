@@ -82,7 +82,7 @@ private:
 
 
     // Currently just simple reflection at boundaries
-    void resolveParticleCollision(Particle& particle)
+    void resolveParticleCollision(Particle& particle) const
     /**
     TODO : Better collision and spacial system for particles and solids. Options in order of increasing complexity:
     Now:
@@ -100,6 +100,8 @@ private:
 
     */
     {
+        const double damping_factor = 0.95;
+
         double x_min = particle.radius();
         double x_max = config_.domain_width_m() - particle.radius();
         double y_min = particle.radius();
@@ -107,20 +109,28 @@ private:
 
 
         if (particle.position()[0] < x_min) {
-            particle.position()[0] = x_min;
-            particle.velocity()[0] *= -1;
+            particle.position()[0] = x_min + (x_min - particle.position()[0]);
+            if (particle.velocity()[0] < 0.0) {
+                particle.velocity()[0] *= -damping_factor;
+        }
         }
         else if (particle.position()[0] > x_max) {
-            particle.position()[0] = x_max;
-            particle.velocity()[0] *= -1;
+            particle.position()[0] = x_max - (particle.position()[0] - x_max);
+            if (particle.velocity()[0] > 0.0) {
+                particle.velocity()[0] *= -damping_factor;
+            }
         }
         if (particle.position()[1] < y_min) {
-            particle.position()[1] = y_min;
-            particle.velocity()[1] *= -1;
+            particle.position()[1] = y_min + (y_min - particle.position()[1]);
+            if (particle.velocity()[1] < 0.0) {
+                particle.velocity()[1] *= -damping_factor;
+            }
         }
         else if (particle.position()[1] > y_max) {
-            particle.position()[1] = y_max;
-            particle.velocity()[1] *= -1;
+            particle.position()[1] = y_max - (particle.position()[1] - y_max);
+            if (particle.velocity()[1] > 0.0) {
+                particle.velocity()[1] *= -damping_factor;
+            }
         }
     }
 };

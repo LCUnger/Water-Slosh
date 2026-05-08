@@ -16,23 +16,30 @@ int main()
     const WindowConfig window_config;
     const SimulationConfig simulation_config{
         .num_particles = 1000,
-        .grid_width = 100,
-        .grid_height = 60,
-        .cell_size_m = 0.05
+        .grid_width = 800,
+        .grid_height = 600,
+        .cell_size_m = 0.05,
+        .particle_radius_m = 0.4
     };
-    const RenderConfig render_config{
-        .particle_radius_px = 2.0f
-    };
+
 
     World world(simulation_config);
-    ParticleRenderer particle_renderer(render_config);
+
 
     sf::RenderWindow window(sf::VideoMode({ window_config.width_px, window_config.height_px }), "SFML 3 Test Render");
+
     const RenderTransform render_transform = RenderTransform::fit_to_target(
         world.config().domain_width_m(),
         world.config().domain_height_m(),
         window.getSize()
     );
+
+    const RenderConfig render_config{
+        .transform = render_transform,
+        .particle_radius_m = static_cast<float>(world.config().particle_radius_m)
+    };
+
+    ParticleRenderer particle_renderer(render_config);
 
     sf::Image image({ window_config.width_px, window_config.height_px }, sf::Color::Black);
 

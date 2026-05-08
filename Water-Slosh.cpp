@@ -13,7 +13,6 @@ struct WindowConfig
 
 int main()
 {
-    const WindowConfig window_config;
     const SimulationConfig simulation_config{
         .num_particles = 1000,
         .grid_width = 800,
@@ -25,6 +24,7 @@ int main()
 
     World world(simulation_config);
 
+    const WindowConfig window_config;
 
     sf::RenderWindow window(sf::VideoMode({ window_config.width_px, window_config.height_px }), "SFML 3 Test Render");
 

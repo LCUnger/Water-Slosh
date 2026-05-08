@@ -34,6 +34,7 @@ public:
           fluid_grid_(config.grid_width, config.grid_height, config.cell_size_m),
           particle_radius_m_(config.particle_radius_m)
     {
+        particles_.reserve(config.num_particles);
         fluid_grid_.initialize();
     }
 

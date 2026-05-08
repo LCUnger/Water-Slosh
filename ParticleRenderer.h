@@ -9,19 +9,20 @@
 
 struct RenderConfig
 {
-    float particle_radius_px = 2.0f;
+	RenderTransform transform = RenderTransform::fit_to_target(5.0, 3.0, { 800, 600 });
+    float particle_radius_m = 0.02;
 };
 
 class ParticleRenderer
 {
 public:
     explicit ParticleRenderer(const RenderConfig& config)
-        : ParticleRenderer(config.particle_radius_px)
+        : ParticleRenderer(config.transform, config.particle_radius_m)
     {
     }
 
-    explicit ParticleRenderer(float radius_px = 2.0f)
-        : radius_px_(radius_px)
+    explicit ParticleRenderer(const RenderTransform& transform, float radius_m = 0.02f)
+		: transform_(transform), radius_px_(transform.meters_to_pixels(radius_m))
     {
         circle_.setRadius(radius_px_);
         circle_.setOrigin({ radius_px_, radius_px_ });
@@ -39,6 +40,7 @@ public:
     }
 
 private:
+    RenderTransform transform_;
     float radius_px_{};
     sf::Color color_ = sf::Color::Blue;
     sf::CircleShape circle_{};

@@ -48,9 +48,13 @@ int main()
         1.0,
         world.config().particle_radius_m));
 
+    sf::Clock clock;
+
     while (window.isOpen())
     {
-        world.update(0.004);
+        const double dt = clock.restart().asSeconds();
+
+        world.update(dt);
         
         while (auto event = window.pollEvent())
         {

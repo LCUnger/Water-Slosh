@@ -75,6 +75,13 @@ int main()
     sf::Texture texture(image);
     sf::Sprite sprite(texture);
 
+  world.add_particle(Particle(
+        (world.config().domain_width_m() / 2.0),
+        (world.config().domain_height_m() / 2.0),
+        0.3,
+        1.0,
+        world.config().particle_radius_m));
+
     while (window.isOpen())
     {
         while (auto event = window.pollEvent())

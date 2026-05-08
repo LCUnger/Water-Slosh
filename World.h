@@ -43,7 +43,7 @@ public:
     void update(float dt)
     {
         for (auto& particle : particles_) {
-            particle.update(dt, Vec2{ 0 , -9.81 }); // TODO : Add external forces like gravity
+            particle.update(dt, gravity);
 		}
 
         // update particles
@@ -72,5 +72,6 @@ private:
     SimulationConfig config_;
     std::vector<Particle> particles_;
     FluidGrid<double> fluid_grid_;
+    static constexpr Vec2 gravity{ 0 , -9.81 };
 };
 

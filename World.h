@@ -45,7 +45,7 @@ public:
     void update(float dt)
     {
         for (auto& particle : particles_) {
-            particle.update(dt, gravity, groundForce(particle));
+            particle.update(dt, gravity);
             resolveParticleCollision(particle);
         }
 
@@ -79,14 +79,6 @@ private:
 
     static constexpr Vec2 gravity{ 0 , -9.81 };
 
-    Vec2 groundForce(const Particle& particle) const
-    {
-		if (particle.position()[1] - particle.radius() < 1e-4) {
-            return Vec2{ 0, -gravity[1] * particle.mass()};
-        }
-        return Vec2{ 0 , 0 };
-    }
-
     // Currently just simple reflection at boundaries
     void resolveParticleCollision(Particle& particle) const
     /**
@@ -106,7 +98,7 @@ private:
 
     */
     {
-        const double damping_factor = 0.95;
+        const double damping_factor = 0.7;
 
         double x_min = particle.radius();
         double x_max = config_.domain_width_m() - particle.radius();

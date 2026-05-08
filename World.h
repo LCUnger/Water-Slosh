@@ -26,7 +26,7 @@ struct SimulationConfig
 };
 
 class World
-{
+{   
 public:
     explicit World(const SimulationConfig& config)
         : config_(config),
@@ -46,19 +46,19 @@ public:
     {
         for (auto& particle : particles_) {
             particle.update(dt, gravity);
-		}
-
-        // TODO: transfer velocity from particles to grid
+        }
         
-		// enforce incompressibility on grid
+        // TODO: transfer velocity from particles to grid
 
-		// transfer velocity from grid to particles
+        // enforce incompressibility on grid
+
+        // transfer velocity from grid to particles
     }
 
     void add_particle(const Particle& particle)
     {
         particles_.push_back(particle);
-	}
+    }
 
     const SimulationConfig& config() const { return config_; }
 
@@ -72,8 +72,52 @@ private:
     SimulationConfig config_;
     std::vector<Particle> particles_;
     FluidGrid<double> fluid_grid_;
-	double particle_radius_m_ = 0.02;
+    double particle_radius_m_ = 0.02;
 
     static constexpr Vec2 gravity{ 0 , -9.81 };
+
+
+    // Currently just simple reflection at boundaries
+    void resolveParticleCollision(Particle& particle)
+    /**
+    TODO : Better collision and spacial system for particles and solids. Options in order of increasing complexity:
+    Now:
+        use cell_type_ for walls and simple blockers
+
+    Next:
+      introduce Collider / SolidGeometry interface
+      cell_type_ is generated from colliders
+
+    Later:
+      add SDF for smooth collision normals and particle pushout
+
+    Much later:
+      fractional/cut-cell boundaries for better pressure solve near curved solids
+
+    */
+    {
+        double x_min = particle.radius();
+        double x_max = config_.domain_width_m() - particle.radius();
+        double y_min = particle.radius();
+        double y_max = config_.domain_height_m() - particle.radius();
+
+
+        if (particle.position()[0] < x_min) {
+            particle.position()[0] = x_min;
+            particle.velocity()[0] *= -1;
+        }
+        else if (particle.position()[0] > x_max) {
+            particle.position()[0] = x_max;
+            particle.velocity()[0] *= -1;
+        }
+        if (particle.position()[1] < y_min) {
+            particle.position()[1] = y_min;
+            particle.velocity()[1] *= -1;
+        }
+        else if (particle.position()[1] > y_max) {
+            particle.position()[1] = y_max;
+            particle.velocity()[1] *= -1;
+        }
+    }
 };
 

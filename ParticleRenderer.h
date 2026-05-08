@@ -10,7 +10,7 @@
 struct RenderConfig
 {
 	RenderTransform transform = RenderTransform::fit_to_target(5.0, 3.0, { 800, 600 });
-    float particle_radius_m = 0.02;
+    float particle_radius_m = 0.02f;
 };
 
 class ParticleRenderer

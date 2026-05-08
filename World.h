@@ -46,7 +46,10 @@ public:
     {
         for (auto& particle : particles_) {
             particle.update(dt, gravity);
+			resolveParticleCollision(particle);
         }
+
+
         
         // TODO: transfer velocity from particles to grid
 

@@ -84,6 +84,8 @@ int main()
 
     while (window.isOpen())
     {
+        world.update(0.004);
+        
         while (auto event = window.pollEvent())
         {
             if (event->is<sf::Event::Closed>())

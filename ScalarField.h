@@ -23,13 +23,13 @@ class ScalarField
 public:
     ScalarField() = default;
     
-    explicit ScalarField(const ShapeType& shape, T cell_size = 1, std::size_t ghost_width = 1)
+    ScalarField(const ShapeType& shape, T cell_size = 1, std::size_t ghost_width = 1)
         : cell_size_(cell_size),
         ghost_width_(std::max(ghost_width, std::size_t(1))),
         physical_shape_(shape + FieldType::index_extend),
         data_(physical_shape_ + ShapeType(2 * ghost_width_)) {}
 
-    explicit ScalarField(const ShapeType& shape, const T& initial_value, T cell_size = 1, std::size_t ghost_width = 1)
+    ScalarField(const ShapeType& shape, const T& initial_value, T cell_size = 1, std::size_t ghost_width = 1)
         : cell_size_(cell_size),
         ghost_width_(std::max(ghost_width, std::size_t(1))),
         physical_shape_(shape + FieldType::index_extend),
@@ -215,7 +215,7 @@ public:
             }
         }
 
-		T interprolated = interpolateLinear(cell_position, stencil);
+        T interprolated = interpolateLinear(cell_position, stencil);
 
         return interprolated;
     }

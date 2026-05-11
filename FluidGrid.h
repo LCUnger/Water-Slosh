@@ -78,6 +78,8 @@ public:
           v_(ShapeType{ width, height }, cell_size, ghost_width_),
           u_weight_sum_(ShapeType{ width, height }, cell_size, ghost_width_),
           v_weight_sum_(ShapeType{ width, height }, cell_size, ghost_width_),
+          prev_u_(ShapeType{ width, height }, cell_size, ghost_width_),
+          prev_v_(ShapeType{ width, height }, cell_size, ghost_width_),
           pressure_(ShapeType{ width, height }, cell_size, ghost_width_),
           density_(ShapeType{ width, height }, cell_size, ghost_width_),
           cell_type_(ShapeType{ width, height }, cell_size, ghost_width_)
@@ -151,6 +153,12 @@ public:
         }
     }
 
+    void copyCurrentVelocityToPrevious()
+    {
+        prev_u_.data() = u_.data();
+        prev_v_.data() = v_.data();
+    }
+
     void clearGhostCells()
     {
         const std::size_t total_width = field_width_ + 2 * ghost_width_;
@@ -182,9 +190,14 @@ public:
     }
 
 
-    void transferVelocityGridToParticle(Particle& particle)
+    void transferVelocityGridToParticles(std::vector<Particle>& particles, double flip_ratio)
     {
-        particle.velocity() = Vec2{ u_.sample(particle.position()), v_.sample(particle.position()) };
+        auto u_delta = u_ - prev_u_;
+        auto v_delta = v_ - prev_v_;
+        for (auto& particle : particles) {
+            Vec2 grid_velocity{ u_.sample(particle.position()), v_.sample(particle.position()) };
+            Vec2 delta_grid_velocity{ u_delta.sample(particle.position()), v_delta.sample(particle.position()) };
+        particle.velocity() = (1.0 - flip_ratio) * grid_velocity + flip_ratio * (particle.velocity() + delta_grid_velocity);
     }
     
 
@@ -193,6 +206,9 @@ private:
     ScalarField<T, 2, fieldtypes::FaceCentered<T, 2, 1>> v_; // Velocity component in y-direction
     ScalarField<T, 2, fieldtypes::CellCentered<T, 2>> u_weight_sum_; // For normalizing the velocity after transferring from particles to grid
     ScalarField<T, 2, fieldtypes::CellCentered<T, 2>> v_weight_sum_; // For normalizing the velocity after transferring from particles to grid
+
+    ScalarField<T, 2, fieldtypes::FaceCentered<T, 2, 0>> prev_u_; // Previous u_ field
+    ScalarField<T, 2, fieldtypes::FaceCentered<T, 2, 1>> prev_v_; // Previous v_ field
 
     ScalarField<T, 2, fieldtypes::CellCentered<T, 2>> pressure_;
     ScalarField<T, 2, fieldtypes::CellCentered<T, 2>> density_;

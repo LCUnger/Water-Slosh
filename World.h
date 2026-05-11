@@ -44,18 +44,26 @@ public:
 
     void update(double dt)
     {
+		// Update particle positions and velocities
         for (auto& particle : particles_) {
             particle.update(dt, gravity);
             resolveParticleCollision(particle);
         }
 
+		// transfer velocity from particles to grid
         for (auto& particle : particles_) {
             fluid_grid_.transferVelocityParticleToGrid(particle);
 		}
 
-        // enforce incompressibility on grid
+		fluid_grid_.normalizebyWeight();
+		fluid_grid_.copyCurrentVelocityToPrevious();
+
+
+		// Enforce incompressibility on the grid
+		fluid_grid_.forceIncompressibility();
 
         // transfer velocity from grid to particles
+		fluid_grid_.transferVelocityGridToParticles(particles_, 0.95);
     }
 
     void add_particle(const Particle& particle)

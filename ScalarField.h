@@ -203,7 +203,6 @@ public:
         return result;
     }
 
-    //TODO : add sampling method with interpolation
     T sample(const PointType& world_position) const {
         StencilType stencil = interpolationStencil(world_position);
         PointType cell_position = positionToCellposition(world_position);

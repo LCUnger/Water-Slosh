@@ -113,6 +113,8 @@ public:
                 if (!forceIncompressibilityAtCell(x, y)) continue;
             }
         }
+
+        clearGhostCells();
     }
 
 

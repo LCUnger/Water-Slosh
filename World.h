@@ -98,7 +98,7 @@ private:
 
     */
     {
-        const double damping_factor = 0.7;
+        const double damping_factor = 0.95;
 
         double x_min = particle.radius();
         double x_max = config_.domain_width_m() - particle.radius();

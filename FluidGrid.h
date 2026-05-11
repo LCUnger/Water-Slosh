@@ -80,7 +80,7 @@ public:
           v_weight_sum_(ShapeType{ width, height }, cell_size, ghost_width_),
           pressure_(ShapeType{ width, height }, cell_size, ghost_width_),
           density_(ShapeType{ width, height }, cell_size, ghost_width_),
-          cell_type_(ShapeType{ width, height })
+          cell_type_(ShapeType{ width, height }, cell_size, ghost_width_)
     {
     }
 
@@ -116,19 +116,19 @@ public:
 
     void transferVelocityParticleToGrid(const Particle& particle)
     {
-        IndexType cell_index = cell_type_.worldToField(particle.position()).toIndex();
+        IndexType cell_index = cell_type_.positionToIndex(particle.position());
         Point2 cell_position = cell_type_.positionToCellposition(particle.position());
 
 
-        if (cell_type_(cell_index) == static_cast<int>(CellType::Solid)) {
+        if (cell_type_(cell_index) == static_cast<T>(CellType::Solid)) {
             return; // Skip solid cells
         }
 
         auto u_stencil = u_.interpolationStencil(particle.position());
         auto v_stencil = v_.interpolationStencil(particle.position());
 
-        auto u_weights = u_.interpolationWeights(cell_position);
-        auto v_weights = v_.interpolationWeights(cell_position);
+        auto u_weights = u_.interpolationLinearWeights(cell_position);
+        auto v_weights = v_.interpolationLinearWeights(cell_position);
 
 
         for (std::size_t i = 0; i < u_stencil.size(); ++i) {
@@ -146,8 +146,8 @@ public:
     void normalizebyWeight()
     {
         for (std::size_t i = 0; i < field_width_*field_height_; ++i) {
-            u_[i] = (u_weight_sum_[i] > 0) ? u_[i] / u_weight_sum_[i] : u_[i];
-            v_[i] = (v_weight_sum_[i] > 0) ? v_[i] / v_weight_sum_[i] : v_[i];
+            u_.data()[i] = (u_weight_sum_.data()[i] > 0) ? u_.data()[i] / u_weight_sum_.data()[i] : u_.data()[i];
+            v_.data()[i] = (v_weight_sum_.data()[i] > 0) ? v_.data()[i] / v_weight_sum_.data()[i] : v_.data()[i];
         }
     }
 
@@ -196,7 +196,7 @@ private:
 
     ScalarField<T, 2, fieldtypes::CellCentered<T, 2>> pressure_;
     ScalarField<T, 2, fieldtypes::CellCentered<T, 2>> density_;
-    ScalarField<int, 2, fieldtypes::CellCentered<int, 2>> cell_type_;
+    ScalarField<T, 2, fieldtypes::CellCentered<T, 2>> cell_type_;
 
     std::size_t field_width_;
     std::size_t field_height_;
@@ -208,9 +208,9 @@ private:
         T divergence = u_(idx_x + 1, idx_y) - u_(idx_x, idx_y) + v_(idx_x, idx_y + 1) - v_(idx_x, idx_y);
 
         //HACK : find a good name for this variable.
-        int s = cell_type_(idx_x + 1, idx_y) + cell_type_(idx_x - 1, idx_y) + cell_type_(idx_x, idx_y + 1) + cell_type_(idx_x, idx_y - 1);
+        T s = cell_type_(idx_x + 1, idx_y) + cell_type_(idx_x - 1, idx_y) + cell_type_(idx_x, idx_y + 1) + cell_type_(idx_x, idx_y - 1);
 
-        if (s == 0) return false; // All cells around are solid, skip
+        if (s == static_cast<T>(0)) return false; // All cells around are solid, skip
 
         u_(idx_x, idx_y) += divergence * (cell_type_(idx_x - 1, idx_y) / s);
         u_(idx_x + 1, idx_y) +=  -divergence * (cell_type_(idx_x + 1, idx_y) / s);

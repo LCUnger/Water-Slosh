@@ -42,7 +42,7 @@ public:
     {
     }
 
-    void update(float dt)
+    void update(double dt)
     {
         for (auto& particle : particles_) {
             particle.update(dt, gravity);

@@ -51,12 +51,7 @@ public:
         }
 
         // transfer velocity from particles to grid
-        for (auto& particle : particles_) {
-            fluid_grid_.transferVelocityParticleToGrid(particle);
-        }
-
-        fluid_grid_.normalizebyWeight();
-        fluid_grid_.copyCurrentVelocityToPrevious();
+		fluid_grid_.transferVelocityParticlesToGrid(particles_);
 
 
         // Enforce incompressibility on the grid
@@ -138,14 +133,6 @@ private:
                 particle.velocity()[1] *= -damping_factor;
             }
         }
-    }
-
-    void particlesToGrid()
-    {
-        for (const auto& particle : particles_) {
-            fluid_grid_.transferVelocityParticleToGrid(particle);
-        }
-        fluid_grid_.normalizebyWeight();
     }
 };
 

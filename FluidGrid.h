@@ -117,6 +117,14 @@ public:
         clearGhostCells();
     }
 
+    void transferVelocityParticlesToGrid(const std::vector<Particle>& particles)
+    {
+        for (const auto& particle : particles) {
+            transferVelocityParticleToGrid(particle);
+        }
+		normalizebyWeight();
+		copyCurrentVelocityToPrevious();
+	}
 
     void transferVelocityParticleToGrid(const Particle& particle)
     {
@@ -145,20 +153,6 @@ public:
                 v_weight_sum_(v_stencil[i]) += v_weights[i];
             }
         }
-    }
-
-    void normalizebyWeight()
-    {
-        for (std::size_t i = 0; i < field_width_*field_height_; ++i) {
-            u_.data()[i] = (u_weight_sum_.data()[i] > 0) ? u_.data()[i] / u_weight_sum_.data()[i] : u_.data()[i];
-            v_.data()[i] = (v_weight_sum_.data()[i] > 0) ? v_.data()[i] / v_weight_sum_.data()[i] : v_.data()[i];
-        }
-    }
-
-    void copyCurrentVelocityToPrevious()
-    {
-        prev_u_.data() = u_.data();
-        prev_v_.data() = v_.data();
     }
 
     void clearGhostCells()
@@ -199,7 +193,8 @@ public:
         for (auto& particle : particles) {
             Vec2 grid_velocity{ u_.sample(particle.position()), v_.sample(particle.position()) };
             Vec2 delta_grid_velocity{ u_delta.sample(particle.position()), v_delta.sample(particle.position()) };
-        particle.velocity() = (1.0 - flip_ratio) * grid_velocity + flip_ratio * (particle.velocity() + delta_grid_velocity);
+            particle.velocity() = (1.0 - flip_ratio) * grid_velocity + flip_ratio * (particle.velocity() + delta_grid_velocity);
+        }
     }
     
 
@@ -236,6 +231,20 @@ private:
         v_(idx_x, idx_y + 1) += -divergence * (cell_type_(idx_x, idx_y + 1) / s);
 
         return true;
+    }
+
+    void normalizebyWeight()
+    {
+        for (std::size_t i = 0; i < field_width_ * field_height_; ++i) {
+            u_.data()[i] = (u_weight_sum_.data()[i] > 0) ? u_.data()[i] / u_weight_sum_.data()[i] : u_.data()[i];
+            v_.data()[i] = (v_weight_sum_.data()[i] > 0) ? v_.data()[i] / v_weight_sum_.data()[i] : v_.data()[i];
+        }
+    }
+
+    void copyCurrentVelocityToPrevious()
+    {
+        prev_u_.data() = u_.data();
+        prev_v_.data() = v_.data();
     }
 
 };

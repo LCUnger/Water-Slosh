@@ -39,6 +39,9 @@ public:
     DataType& data() { return data_; }
     const DataType& data() const { return data_; }
 
+    T cell_size() const { return cell_size_; }
+    std::size_t ghost_width() const { return ghost_width_; }
+
     T& at(const IndexType& index)
     {
         return data_.at(physicalToDataIndex(index));
@@ -251,4 +254,23 @@ private:
     // TODO : Decide what to do regarding S field / active cells, and how to handle interpolation near boundaries (ghost cells)
 
 };
+}
+
+namespace toolbox
+{
+template<typename T, std::size_t dimensions, typename FieldType>
+ScalarField<T, dimensions, FieldType> operator-(const ScalarField<T, dimensions, FieldType>& left,
+    const ScalarField<T, dimensions, FieldType>& right)
+{
+    if (left.data().shape() != right.data().shape()) {
+        throw std::invalid_argument("ScalarField shape mismatch in operator-");
+    }
+
+    ScalarField<T, dimensions, FieldType> result(left.data().shape(), left.cell_size(), left.ghost_width());
+    for (std::size_t i = 0; i < result.data().size(); ++i) {
+        result.data()[i] = left.data()[i] - right.data()[i];
+    }
+
+    return result;
+}
 }

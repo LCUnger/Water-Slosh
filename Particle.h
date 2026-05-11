@@ -20,7 +20,7 @@ public:
     Integrate/update the particle's position and velocity over time dt, given an acceleration.
     Using semi-implicit Euler integration method. 
     */
-    void integrate(float dt, const Vec2& acceleration, const Vec2& external_forces = Vec2{0, 0})
+    void integrate(double dt, const Vec2& acceleration, const Vec2& external_forces = Vec2{0, 0})
     {    
         Vec2 total_acceleration = acceleration;
         if (mass_ > 0.0) {
@@ -31,7 +31,7 @@ public:
         position_ += velocity_ * dt;
     }
 
-    void update(float dt, const Vec2& acceleration, const Vec2& external_forces = Vec2{0,0})
+    void update(double dt, const Vec2& acceleration, const Vec2& external_forces = Vec2{0,0})
     {
         integrate(dt, acceleration, external_forces);
     }

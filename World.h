@@ -49,9 +49,9 @@ public:
             resolveParticleCollision(particle);
         }
 
-
-        
-        // TODO: transfer velocity from particles to grid
+        for (auto& particle : particles_) {
+            fluid_grid_.transferVelocityParticleToGrid(particle);
+		}
 
         // enforce incompressibility on grid
 
@@ -130,6 +130,15 @@ private:
                 particle.velocity()[1] *= -damping_factor;
             }
         }
+    }
+
+    void particlesToGrid()
+    {
+        for (const auto& particle : particles_) {
+            fluid_grid_.transferVelocityParticleToGrid(particle);
+        }
+        fluid_grid_.normalizebyWeight();
+        fluid_grid_.clearGhostCells();
     }
 };
 

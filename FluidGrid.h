@@ -76,8 +76,8 @@ public:
         : field_width_(width), field_height_(height), cell_size_(cell_size),
           u_(ShapeType{ width, height }, cell_size, ghost_width_),
           v_(ShapeType{ width, height }, cell_size, ghost_width_),
-          pressure_(ShapeType{ width, height }, cell_size, std::size_t{ 1 }),
-          density_(ShapeType{ width, height }, cell_size, std::size_t{ 1 }),
+          u_weight_sum_(ShapeType{ width, height }, cell_size, ghost_width_),
+          v_weight_sum_(ShapeType{ width, height }, cell_size, ghost_width_),
           pressure_(ShapeType{ width, height }, cell_size, ghost_width_),
           density_(ShapeType{ width, height }, cell_size, ghost_width_),
           cell_type_(ShapeType{ width, height })
@@ -111,13 +111,74 @@ public:
                 if (!forceIncompressibilityAtCell(x, y)) continue;
             }
         }
-
     }
 
 
-    void transferVelocityParticleToGrid()
+    void transferVelocityParticleToGrid(const Particle& particle)
     {
-     
+        IndexType cell_index = cell_type_.worldToField(particle.position()).toIndex();
+        Point2 cell_position = cell_type_.positionToCellposition(particle.position());
+
+
+        if (cell_type_(cell_index) == static_cast<int>(CellType::Solid)) {
+            return; // Skip solid cells
+        }
+
+        auto u_stencil = u_.interpolationStencil(particle.position());
+        auto v_stencil = v_.interpolationStencil(particle.position());
+
+        auto u_weights = u_.interpolationWeights(cell_position);
+        auto v_weights = v_.interpolationWeights(cell_position);
+
+
+        for (std::size_t i = 0; i < u_stencil.size(); ++i) {
+            if (u_.isStored(u_stencil[i])) {
+                u_(u_stencil[i]) += particle.velocity()[0] * u_weights[i];
+                u_weight_sum_(u_stencil[i]) += u_weights[i];
+            }
+            if (v_.isStored(v_stencil[i])) {
+                v_(v_stencil[i]) += particle.velocity()[1] * v_weights[i];
+                v_weight_sum_(v_stencil[i]) += v_weights[i];
+            }
+        }
+    }
+
+    void normalizebyWeight()
+    {
+        for (std::size_t i = 0; i < field_width_*field_height_; ++i) {
+            u_[i] = (u_weight_sum_[i] > 0) ? u_[i] / u_weight_sum_[i] : u_[i];
+            v_[i] = (v_weight_sum_[i] > 0) ? v_[i] / v_weight_sum_[i] : v_[i];
+        }
+    }
+
+    void clearGhostCells()
+    {
+        const std::size_t total_width = field_width_ + 2 * ghost_width_;
+        const std::size_t total_height = field_height_ + 2 * ghost_width_;
+
+        for (std::size_t x = 0; x < total_width; ++x) {
+            for (std::size_t y = 0; y < ghost_width_; ++y) {
+                u_.data()(x, y) = 0;
+                v_.data()(x, y) = 0;
+            }
+
+            for (std::size_t y = total_height - ghost_width_; y < total_height; ++y) {
+                u_.data()(x, y) = 0;
+                v_.data()(x, y) = 0;
+            }
+        }
+
+        for (std::size_t y = ghost_width_; y < total_height - ghost_width_; ++y) {
+            for (std::size_t x = 0; x < ghost_width_; ++x) {
+                u_.data()(x, y) = 0;
+                v_.data()(x, y) = 0;
+            }
+
+            for (std::size_t x = total_width - ghost_width_; x < total_width; ++x) {
+                u_.data()(x, y) = 0;
+                v_.data()(x, y) = 0;
+            }
+        }
     }
 
 
@@ -130,6 +191,9 @@ public:
 private:
     ScalarField<T, 2, fieldtypes::FaceCentered<T, 2, 0>> u_; // Velocity component in x-direction
     ScalarField<T, 2, fieldtypes::FaceCentered<T, 2, 1>> v_; // Velocity component in y-direction
+    ScalarField<T, 2, fieldtypes::CellCentered<T, 2>> u_weight_sum_; // For normalizing the velocity after transferring from particles to grid
+    ScalarField<T, 2, fieldtypes::CellCentered<T, 2>> v_weight_sum_; // For normalizing the velocity after transferring from particles to grid
+
     ScalarField<T, 2, fieldtypes::CellCentered<T, 2>> pressure_;
     ScalarField<T, 2, fieldtypes::CellCentered<T, 2>> density_;
     ScalarField<int, 2, fieldtypes::CellCentered<int, 2>> cell_type_;

@@ -67,13 +67,19 @@ enum class CellType
 template<typename T>
 class FluidGrid
 {
+    using ShapeType = Vec<std::size_t, 2>;
+    using IndexType = Vec<int, 2>;
+    std::size_t ghost_width_ = 1;
+
 public:
     FluidGrid(std::size_t width, std::size_t height, T cell_size)
         : field_width_(width), field_height_(height), cell_size_(cell_size),
-          u_(ShapeType{ width, height }, cell_size, std::size_t{ 1 }),
-          v_(ShapeType{ width, height }, cell_size, std::size_t{ 1 }),
+          u_(ShapeType{ width, height }, cell_size, ghost_width_),
+          v_(ShapeType{ width, height }, cell_size, ghost_width_),
           pressure_(ShapeType{ width, height }, cell_size, std::size_t{ 1 }),
           density_(ShapeType{ width, height }, cell_size, std::size_t{ 1 }),
+          pressure_(ShapeType{ width, height }, cell_size, ghost_width_),
+          density_(ShapeType{ width, height }, cell_size, ghost_width_),
           cell_type_(ShapeType{ width, height })
     {
     }
@@ -122,8 +128,6 @@ public:
     
 
 private:
-    using ShapeType = Vec<std::size_t, 2>;
-
     ScalarField<T, 2, fieldtypes::FaceCentered<T, 2, 0>> u_; // Velocity component in x-direction
     ScalarField<T, 2, fieldtypes::FaceCentered<T, 2, 1>> v_; // Velocity component in y-direction
     ScalarField<T, 2, fieldtypes::CellCentered<T, 2>> pressure_;

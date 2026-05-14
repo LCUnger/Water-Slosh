@@ -237,8 +237,11 @@ private:
 
     void normalizebyWeight()
     {
-        for (std::size_t i = 0; i < field_width_ * field_height_; ++i) {
+        for (std::size_t i = 0; i < u_.data().size(); ++i) {
             u_.data()[i] = (u_weight_sum_.data()[i] > 0) ? u_.data()[i] / u_weight_sum_.data()[i] : u_.data()[i];
+        }
+
+        for (std::size_t i = 0; i < v_.data().size(); ++i) {
             v_.data()[i] = (v_weight_sum_.data()[i] > 0) ? v_.data()[i] / v_weight_sum_.data()[i] : v_.data()[i];
         }
     }

@@ -72,7 +72,7 @@ class FluidGrid
     std::size_t ghost_width_ = 1;
 
 public:
-    FluidGrid(std::size_t width, std::size_t height, T cell_size)
+    FluidGrid(std::size_t width, std::size_t height, T cell_size, std::size_t incompressibility_iterations = 10)
         : field_width_(width), field_height_(height), cell_size_(cell_size),
           u_(ShapeType{ width, height }, cell_size, ghost_width_),
           v_(ShapeType{ width, height }, cell_size, ghost_width_),
@@ -82,7 +82,8 @@ public:
           prev_v_(ShapeType{ width, height }, cell_size, ghost_width_),
           pressure_(ShapeType{ width, height }, cell_size, ghost_width_),
           density_(ShapeType{ width, height }, cell_size, ghost_width_),
-          cell_type_(ShapeType{ width, height }, cell_size, ghost_width_)
+          cell_type_(ShapeType{ width, height }, cell_size, ghost_width_),
+		  incompressibility_iterations_(incompressibility_iterations)
     {
     }
 
@@ -107,13 +108,13 @@ public:
         Note : we can also consider using a multigrid method to solve the Poisson equation, which will give us even faster convergence, but is even more complex to implement.
         */
     {
-        // TODO : Iterations
-        for (std::size_t x = 0; x < field_width_; ++x) {
-            for (std::size_t y = 0; y < field_height_; ++y) {
+        for (std::size_t iteration = 0; iteration < 10; ++iteration) {
+            for (std::size_t x = 0; x < field_width_; ++x) {
+                for (std::size_t y = 0; y < field_height_; ++y) {
                 if (!forceIncompressibilityAtCell(x, y)) continue;
             }
         }
-
+        }
         clearGhostCells();
     }
 
@@ -214,6 +215,7 @@ private:
     std::size_t field_width_;
     std::size_t field_height_;
     T cell_size_;
+	size_t incompressibility_iterations_ = 10;
 
     // TODO : Add overrelaxation
     bool forceIncompressibilityAtCell(std::size_t idx_x, std::size_t idx_y)

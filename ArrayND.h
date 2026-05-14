@@ -7,6 +7,7 @@
 #include <concepts>
 #include <cstddef>
 #include <stdexcept>
+#include <string>
 #include <type_traits>
 #include <vector>
 
@@ -39,11 +40,25 @@ namespace toolbox
         // Flat index accessing
         T& operator[](std::size_t flat_index)
         {
+#ifndef NDEBUG
+            if (flat_index >= elements_.size()) {
+                throw std::out_of_range(
+                    "ArrayND flat index out of bounds: " + std::to_string(flat_index) +
+                    " >= " + std::to_string(elements_.size()));
+            }
+#endif
             return elements_[flat_index];
         }
 
         const T& operator[](std::size_t flat_index) const
         {
+#ifndef NDEBUG
+            if (flat_index >= elements_.size()) {
+                throw std::out_of_range(
+                    "ArrayND flat index out of bounds: " + std::to_string(flat_index) +
+                    " >= " + std::to_string(elements_.size()));
+            }
+#endif
             return elements_[flat_index];
         }
 
@@ -222,6 +237,14 @@ namespace toolbox
             std::size_t flat_index = 0;
 
             for (std::size_t axis = 0; axis < Rank; ++axis) {
+#ifndef NDEBUG
+                if (index[axis] < 0 || static_cast<std::size_t>(index[axis]) >= shape_[axis]) {
+                    throw std::out_of_range(
+                        "ArrayND index out of bounds on axis " + std::to_string(axis) +
+                        ": " + std::to_string(index[axis]) +
+                        " not in [0, " + std::to_string(shape_[axis]) + ")");
+                }
+#endif
                 flat_index += static_cast<std::size_t>(index[axis]) * strides_[axis];
             }
 

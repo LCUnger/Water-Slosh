@@ -165,11 +165,11 @@ public:
 
     void transferVelocityGridToParticles(std::vector<Particle>& particles, double flip_ratio)
     {
-        auto u_delta = u_ - prev_u_;
-        auto v_delta = v_ - prev_v_;
         for (auto& particle : particles) {
-            Vec2 grid_velocity{ u_.sample(particle.position()), v_.sample(particle.position()) };
-            Vec2 delta_grid_velocity{ u_delta.sample(particle.position()), v_delta.sample(particle.position()) };
+            const Point2& position = particle.position();
+            Vec2 grid_velocity{ u_.sample(position), v_.sample(position) };
+            Vec2 previous_grid_velocity{ prev_u_.sample(position), prev_v_.sample(position) };
+            Vec2 delta_grid_velocity = grid_velocity - previous_grid_velocity;
             particle.velocity() = (1.0 - flip_ratio) * grid_velocity + flip_ratio * (particle.velocity() + delta_grid_velocity);
         }
     }

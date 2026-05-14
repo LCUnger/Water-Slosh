@@ -1,10 +1,12 @@
 #include "../ArrayND.h"
 #include "../FieldTypes.h"
+#include "../FluidGrid.h"
 #include "../Point.h"
 #include "../PointVecOps.h"
 #include "../ScalarField.h"
 #include "../Tensor.h"
 #include "../Vec.h"
+#include "../World.h"
 
 #include <array>
 #include <cmath>
@@ -362,6 +364,14 @@ void testScalarFieldIndexBounds()
     EXPECT_NEAR(cell_field(3, 2), 48.0, 1e-12);
     EXPECT_THROWS(cell_field.at(Index{ 6, 0 }), std::out_of_range);
 
+    cell_field.data().fill(2.0);
+    EXPECT_NEAR(cell_field.sample(toolbox::Point<double, 2>{ 1.0, 1.0 }), 2.0, 1e-12);
+
+    CellField small_cell_field{ Shape{ 4, 3 }, 0.05, std::size_t{ 1 } };
+    const auto bottom_left_index = small_cell_field.positionToIndex(toolbox::Point<double, 2>{ 0.03, 0.03 });
+    EXPECT_EQ(bottom_left_index[0], 0);
+    EXPECT_EQ(bottom_left_index[1], 0);
+
     FaceYField face_field{ Shape{ 4, 3 }, 1.0, std::size_t{ 1 } };
     EXPECT_EQ(face_field.data().shape()[0], std::size_t{ 6 });
     EXPECT_EQ(face_field.data().shape()[1], std::size_t{ 6 });
@@ -375,6 +385,115 @@ void testScalarFieldIndexBounds()
     EXPECT_FALSE(face_field.isStored(Index{ -2, 0 }));
     EXPECT_FALSE(face_field.isStored(Index{ 5, 0 }));
     EXPECT_FALSE(face_field.isStored(Index{ 0, 5 }));
+
+    FaceYField left{ Shape{ 4, 3 }, 1.0, std::size_t{ 1 } };
+    FaceYField right{ Shape{ 4, 3 }, 1.0, std::size_t{ 1 } };
+    left.data().fill(1.0);
+    right.data().fill(0.25);
+    const auto difference = left - right;
+    EXPECT_EQ(difference.data().shape()[0], left.data().shape()[0]);
+    EXPECT_EQ(difference.data().shape()[1], left.data().shape()[1]);
+    EXPECT_EQ(difference.data().size(), left.data().size());
+    EXPECT_NEAR(difference.data()[0], 0.75, 1e-12);
+    EXPECT_NEAR(difference.data()[difference.data().size() - 1], 0.75, 1e-12);
+}
+
+void testFluidGridInitializesBoundarySolids()
+{
+    FluidGrid<double> grid{ 5, 4, 1.0 };
+    grid.initialize();
+
+    EXPECT_TRUE(grid.cellTypeAt(0, 0) == CellType::Solid);
+    EXPECT_TRUE(grid.cellTypeAt(4, 0) == CellType::Solid);
+    EXPECT_TRUE(grid.cellTypeAt(0, 3) == CellType::Solid);
+    EXPECT_TRUE(grid.cellTypeAt(4, 3) == CellType::Solid);
+    EXPECT_TRUE(grid.cellTypeAt(2, 0) == CellType::Solid);
+    EXPECT_TRUE(grid.cellTypeAt(2, 3) == CellType::Solid);
+    EXPECT_TRUE(grid.cellTypeAt(0, 2) == CellType::Solid);
+    EXPECT_TRUE(grid.cellTypeAt(4, 2) == CellType::Solid);
+
+    EXPECT_TRUE(grid.cellTypeAt(1, 1) == CellType::Liquid);
+    EXPECT_TRUE(grid.cellTypeAt(3, 2) == CellType::Liquid);
+
+    EXPECT_TRUE(grid.cellTypeAt(-1, 1) == CellType::Solid);
+    EXPECT_TRUE(grid.cellTypeAt(5, 1) == CellType::Solid);
+}
+
+void testWorldUpdateNearBottomBoundary()
+{
+    World world{ SimulationConfig{
+        .num_particles = 1,
+        .grid_width = 16,
+        .grid_height = 12,
+        .cell_size_m = 0.05,
+        .particle_radius_m = 0.035
+    } };
+
+    world.add_particle(Particle{ 0.07, 0.07, 0.0, 0.0, world.config().particle_radius_m });
+    world.update(0.033);
+
+    EXPECT_EQ(world.particles().size(), std::size_t{ 1 });
+    EXPECT_TRUE(world.particles()[0].position()[1] >= world.config().particle_radius_m);
+}
+
+void testWorldUpdateSeededLowerHalfFluid()
+{
+    World world{ SimulationConfig{
+        .num_particles = 2000,
+        .grid_width = 160,
+        .grid_height = 120,
+        .cell_size_m = 0.05,
+        .particle_radius_m = 0.035
+    } };
+
+    const auto& config = world.config();
+    const double radius = config.particle_radius_m;
+    const double spacing = radius * 3.0;
+    const double x_min = radius * 2.0;
+    const double x_max = config.domain_width_m() - radius * 2.0;
+    const double y_min = radius * 2.0;
+    const double y_max = config.domain_height_m() * 0.5;
+
+    std::size_t particles_added = 0;
+    for (double y = y_min; y < y_max && particles_added < config.num_particles; y += spacing) {
+        for (double x = x_min; x < x_max && particles_added < config.num_particles; x += spacing) {
+            world.add_particle(Particle(x, y, 0.0, 0.0, radius));
+            ++particles_added;
+        }
+    }
+
+    EXPECT_EQ(world.particles().size(), config.num_particles);
+
+    double max_abs_position = 0.0;
+    double max_abs_velocity = 0.0;
+
+    for (int frame = 0; frame < 10; ++frame) {
+        try {
+            world.update(0.033);
+        }
+        catch (const std::exception& exception) {
+            throw std::runtime_error(
+                "seeded lower half update failed at frame " + std::to_string(frame) +
+                " (max_abs_position=" + std::to_string(max_abs_position) +
+                ", max_abs_velocity=" + std::to_string(max_abs_velocity) + ")" +
+                ": " + exception.what());
+        }
+
+        max_abs_position = 0.0;
+        max_abs_velocity = 0.0;
+        for (const auto& particle : world.particles()) {
+            EXPECT_TRUE(std::isfinite(particle.position()[0]));
+            EXPECT_TRUE(std::isfinite(particle.position()[1]));
+            EXPECT_TRUE(std::isfinite(particle.velocity()[0]));
+            EXPECT_TRUE(std::isfinite(particle.velocity()[1]));
+            max_abs_position = std::max(max_abs_position, std::abs(particle.position()[0]));
+            max_abs_position = std::max(max_abs_position, std::abs(particle.position()[1]));
+            max_abs_velocity = std::max(max_abs_velocity, std::abs(particle.velocity()[0]));
+            max_abs_velocity = std::max(max_abs_velocity, std::abs(particle.velocity()[1]));
+        }
+    }
+
+    EXPECT_EQ(world.particles().size(), config.num_particles);
 }
 
 void testTensorConstructionAccessAndArithmetic()
@@ -554,6 +673,9 @@ int main()
     runTest("PointVecOps", testPointVecOps);
     runTest("FieldTypes", testFieldTypes);
     runTest("ScalarField index bounds", testScalarFieldIndexBounds);
+    runTest("FluidGrid boundary cell mask", testFluidGridInitializesBoundarySolids);
+    runTest("World update near bottom boundary", testWorldUpdateNearBottomBoundary);
+    runTest("World update seeded lower half fluid", testWorldUpdateSeededLowerHalfFluid);
     runTest("Tensor construction, access, and arithmetic", testTensorConstructionAccessAndArithmetic);
     runTest("ArrayND construction, access, and fill", testArrayNDConstructionAccessAndFill);
     runTest("ArrayND arithmetic and errors", testArrayNDArithmeticAndErrors);

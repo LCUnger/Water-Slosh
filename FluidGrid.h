@@ -109,8 +109,8 @@ public:
         */
     {
         for (std::size_t iteration = 0; iteration < 10; ++iteration) {
-            for (std::size_t x = 0; x < field_width_; ++x) {
-                for (std::size_t y = 0; y < field_height_; ++y) {
+            for (int x = 0; x < static_cast<int>(field_width_); ++x) {
+                for (int y = 0; y < static_cast<int>(field_height_); ++y) {
                 if (!forceIncompressibilityAtCell(x, y)) continue;
             }
         }
@@ -194,19 +194,27 @@ private:
 	size_t incompressibility_iterations_ = 10;
 
     // TODO : Add overrelaxation
-    bool forceIncompressibilityAtCell(std::size_t idx_x, std::size_t idx_y)
+    bool forceIncompressibilityAtCell(int idx_x, int idx_y)
     {
+
+        if (cell_type_(x, y) == static_cast<T>(CellType::Solid)) {
+            return false;
+        }
+
+        const T right_weight = cell_type_(idx_x + 1, idx_y);
+        const T left_weight = cell_type_(idx_x - 1, idx_y);
+        const T top_weight = cell_type_(idx_x, idx_y + 1);
+        const T bottom_weight = cell_type_(idx_x, idx_y - 1);
+        const T neighbor_weight_sum = right_weight + left_weight + top_weight + bottom_weight;
+
+        if (neighbor_weight_sum == static_cast<T>(0)) return false; // All cells around are solid, skip
+
         T divergence = u_(idx_x + 1, idx_y) - u_(idx_x, idx_y) + v_(idx_x, idx_y + 1) - v_(idx_x, idx_y);
 
-        //HACK : find a good name for this variable.
-        T s = cell_type_(idx_x + 1, idx_y) + cell_type_(idx_x - 1, idx_y) + cell_type_(idx_x, idx_y + 1) + cell_type_(idx_x, idx_y - 1);
-
-        if (s == static_cast<T>(0)) return false; // All cells around are solid, skip
-
-        u_(idx_x, idx_y) += divergence * (cell_type_(idx_x - 1, idx_y) / s);
-        u_(idx_x + 1, idx_y) +=  -divergence * (cell_type_(idx_x + 1, idx_y) / s);
-        v_(idx_x, idx_y) += divergence * (cell_type_(idx_x, idx_y - 1) / s);
-        v_(idx_x, idx_y + 1) += -divergence * (cell_type_(idx_x, idx_y + 1) / s);
+        u_(x, y) += divergence * (left_weight / neighbor_weight_sum);
+        u_(x + 1, y) += -divergence * (right_weight / neighbor_weight_sum);
+        v_(x, y) += divergence * (bottom_weight / neighbor_weight_sum);
+        v_(x, y + 1) += -divergence * (top_weight / neighbor_weight_sum);
 
         return true;
     }

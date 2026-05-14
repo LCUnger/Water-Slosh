@@ -92,12 +92,12 @@ public:
 
     PointType worldToField(const PointType& world_position) const
     {
-        return world_position - FieldType::offset;
+        return world_position - FieldType::offset * cell_size_;
     }
 
     PointType fieldToWorld(const PointType& field_position) const
     {
-        return field_position + FieldType::offset;
+        return field_position + FieldType::offset * cell_size_;
     }
 
     bool isStored(const IndexType& index) const
@@ -168,9 +168,10 @@ public:
         return stencil;
     }
 
-    WeightsType interpolationLinearWeights(const PointType& cell_position)
+    WeightsType interpolationLinearWeights(const PointType& cell_position) const
     {
         WeightsType weights{};
+        weights.fill(static_cast<T>(1));
 
         StencilType stencil_offsets = StencilOffsets();
 
@@ -266,7 +267,7 @@ ScalarField<T, dimensions, FieldType> operator-(const ScalarField<T, dimensions,
         throw std::invalid_argument("ScalarField shape mismatch in operator-");
     }
 
-    ScalarField<T, dimensions, FieldType> result(left.data().shape(), left.cell_size(), left.ghost_width());
+    ScalarField<T, dimensions, FieldType> result = left;
     for (std::size_t i = 0; i < result.data().size(); ++i) {
         result.data()[i] = left.data()[i] - right.data()[i];
     }

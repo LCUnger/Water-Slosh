@@ -83,7 +83,7 @@ public:
           pressure_(ShapeType{ width, height }, cell_size, ghost_width_),
           density_(ShapeType{ width, height }, cell_size, ghost_width_),
           cell_type_(ShapeType{ width, height }, cell_size, ghost_width_),
-		  incompressibility_iterations_(incompressibility_iterations)
+          incompressibility_iterations_(incompressibility_iterations)
     {
     }
 
@@ -131,9 +131,9 @@ public:
         for (std::size_t iteration = 0; iteration < 10; ++iteration) {
             for (int x = 0; x < static_cast<int>(field_width_); ++x) {
                 for (int y = 0; y < static_cast<int>(field_height_); ++y) {
-                if (!forceIncompressibilityAtCell(x, y)) continue;
+                    if (!forceIncompressibilityAtCell(x, y)) continue;
+                }
             }
-        }
         }
         clearGhostCells();
     }
@@ -148,9 +148,9 @@ public:
         for (const auto& particle : particles) {
             transferVelocityParticleToGrid(particle);
         }
-		normalizebyWeight();
-		copyCurrentVelocityToPrevious();
-	}
+        normalizebyWeight();
+        copyCurrentVelocityToPrevious();
+    }
 
     void clearGhostCells()
     {
@@ -182,7 +182,7 @@ public:
         }
     }
 
-
+    
     void transferVelocityGridToParticles(std::vector<Particle>& particles, double flip_ratio)
     {
         for (auto& particle : particles) {
@@ -198,8 +198,8 @@ public:
 private:
     ScalarField<T, 2, fieldtypes::FaceCentered<T, 2, 0>> u_; // Velocity component in x-direction
     ScalarField<T, 2, fieldtypes::FaceCentered<T, 2, 1>> v_; // Velocity component in y-direction
-    ScalarField<T, 2, fieldtypes::CellCentered<T, 2>> u_weight_sum_; // For normalizing the velocity after transferring from particles to grid
-    ScalarField<T, 2, fieldtypes::CellCentered<T, 2>> v_weight_sum_; // For normalizing the velocity after transferring from particles to grid
+    ScalarField<T, 2, fieldtypes::FaceCentered<T, 2, 0>> u_weight_sum_; // For normalizing the velocity after transferring from particles to grid
+    ScalarField<T, 2, fieldtypes::FaceCentered<T, 2, 1>> v_weight_sum_; // For normalizing the velocity after transferring from particles to grid
 
     ScalarField<T, 2, fieldtypes::FaceCentered<T, 2, 0>> prev_u_; // Previous u_ field
     ScalarField<T, 2, fieldtypes::FaceCentered<T, 2, 1>> prev_v_; // Previous v_ field
@@ -211,7 +211,7 @@ private:
     std::size_t field_width_;
     std::size_t field_height_;
     T cell_size_;
-	size_t incompressibility_iterations_ = 10;
+    size_t incompressibility_iterations_ = 10;
 
     // TODO : Add overrelaxation
     bool forceIncompressibilityAtCell(int idx_x, int idx_y)

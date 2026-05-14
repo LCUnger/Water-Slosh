@@ -93,10 +93,30 @@ public:
     T physical_width() const { return static_cast<T>(field_width_) * cell_size_; }
     T physical_height() const { return static_cast<T>(field_height_) * cell_size_; }
 
-    void initialize() {};
+    void initialize()
+    {
+        setCellTypeMask();
+        clearGhostCells();
+    }
 
 
-    void setCellTypeMask() {};
+    void setCellTypeMask()
+    {
+        cell_type_.data().fill(static_cast<T>(CellType::Solid));
+
+        for (std::size_t x = 1; x + 1 < field_width_; ++x) {
+            for (std::size_t y = 1; y + 1 < field_height_; ++y) {
+                cell_type_(x, y) = static_cast<T>(CellType::Liquid);
+            }
+        }
+    }
+
+    CellType cellTypeAt(int x, int y) const
+    {
+        return cell_type_(x, y) == static_cast<T>(CellType::Solid)
+            ? CellType::Solid
+            : CellType::Liquid;
+    }
 
 
     void forceIncompressibility()

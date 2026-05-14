@@ -120,41 +120,17 @@ public:
 
     void transferVelocityParticlesToGrid(const std::vector<Particle>& particles)
     {
+        u_.data().fill(static_cast<T>(0));
+        v_.data().fill(static_cast<T>(0));
+        u_weight_sum_.data().fill(static_cast<T>(0));
+        v_weight_sum_.data().fill(static_cast<T>(0));
+
         for (const auto& particle : particles) {
             transferVelocityParticleToGrid(particle);
         }
 		normalizebyWeight();
 		copyCurrentVelocityToPrevious();
 	}
-
-    void transferVelocityParticleToGrid(const Particle& particle)
-    {
-        IndexType cell_index = cell_type_.positionToIndex(particle.position());
-        Point2 cell_position = cell_type_.positionToCellposition(particle.position());
-
-
-        if (cell_type_(cell_index) == static_cast<T>(CellType::Solid)) {
-            return; // Skip solid cells
-        }
-
-        auto u_stencil = u_.interpolationStencil(particle.position());
-        auto v_stencil = v_.interpolationStencil(particle.position());
-
-        auto u_weights = u_.interpolationLinearWeights(cell_position);
-        auto v_weights = v_.interpolationLinearWeights(cell_position);
-
-
-        for (std::size_t i = 0; i < u_stencil.size(); ++i) {
-            if (u_.isStored(u_stencil[i])) {
-                u_(u_stencil[i]) += particle.velocity()[0] * u_weights[i];
-                u_weight_sum_(u_stencil[i]) += u_weights[i];
-            }
-            if (v_.isStored(v_stencil[i])) {
-                v_(v_stencil[i]) += particle.velocity()[1] * v_weights[i];
-                v_weight_sum_(v_stencil[i]) += v_weights[i];
-            }
-        }
-    }
 
     void clearGhostCells()
     {
@@ -233,6 +209,34 @@ private:
         v_(idx_x, idx_y + 1) += -divergence * (cell_type_(idx_x, idx_y + 1) / s);
 
         return true;
+    }
+
+    void transferVelocityParticleToGrid(const Particle& particle)
+    {
+        IndexType cell_index = cell_type_.positionToIndex(particle.position());
+
+
+        if (cell_type_(cell_index) == static_cast<T>(CellType::Solid)) {
+            return; // Skip solid cells
+        }
+
+        auto u_stencil = u_.interpolationStencil(particle.position());
+        auto v_stencil = v_.interpolationStencil(particle.position());
+
+        auto u_weights = u_.interpolationLinearWeights(u_.positionToCellposition(particle.position()));
+        auto v_weights = v_.interpolationLinearWeights(v_.positionToCellposition(particle.position()));
+
+
+        for (std::size_t i = 0; i < u_stencil.size(); ++i) {
+            if (u_.isStored(u_stencil[i])) {
+                u_(u_stencil[i]) += particle.velocity()[0] * u_weights[i];
+                u_weight_sum_(u_stencil[i]) += u_weights[i];
+            }
+            if (v_.isStored(v_stencil[i])) {
+                v_(v_stencil[i]) += particle.velocity()[1] * v_weights[i];
+                v_weight_sum_(v_stencil[i]) += v_weights[i];
+            }
+        }
     }
 
     void normalizebyWeight()

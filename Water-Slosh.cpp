@@ -2,24 +2,45 @@
 #include <cmath>
 #include <cstdint>
 #include <algorithm>
+#include <cstddef>
 
 #include "ParticleRenderer.h"
 #include "World.h"
 
 struct WindowConfig
 {
-    unsigned int width_px = 800;
-    unsigned int height_px = 600;
+    unsigned int width_px = 1280;
+    unsigned int height_px = 900;
 };
+
+void seedLowerHalfFluid(World& world)
+{
+    const auto& config = world.config();
+    const double radius = config.particle_radius_m;
+    const double spacing = radius * 3.0;
+    const double x_min = radius * 2.0;
+    const double x_max = config.domain_width_m() - radius * 2.0;
+    const double y_min = radius * 2.0;
+    const double y_max = config.domain_height_m() * 0.5;
+
+    std::size_t particles_added = 0;
+    for (double y = y_min; y < y_max && particles_added < config.num_particles; y += spacing) {
+        for (double x = x_min; x < x_max && particles_added < config.num_particles; x += spacing) {
+            world.add_particle(Particle(x, y, 0.0, 0.0, radius));
+            ++particles_added;
+        }
+    }
+}
 
 int main()
 {
     const SimulationConfig simulation_config{
-        .num_particles = 1000,
-        .grid_width = 800,
-        .grid_height = 600,
+        .num_particles = 2000,
+        // Simulation cells, not screen pixels. 160x120 is already 19,200 cells.
+        .grid_width = 160,
+        .grid_height = 120,
         .cell_size_m = 0.05,
-        .particle_radius_m = 0.4
+        .particle_radius_m = 0.035
     };
 
 
@@ -42,18 +63,13 @@ int main()
 
     ParticleRenderer particle_renderer(render_config);
 
-    world.add_particle(Particle(
-        (world.config().domain_width_m() / 2.0),
-        (world.config().domain_height_m() / 2.0),
-        0.3,
-        1.0,
-        world.config().particle_radius_m));
+    seedLowerHalfFluid(world);
 
     sf::Clock clock;
 
     while (window.isOpen())
     {
-        const float dt = std::min(clock.restart().asSeconds(), 0.033f);
+		const float dt = std::min(clock.restart().asSeconds(), 0.033f); // Cap at roughly 30 FPS to avoid instability in the simulation when the window is not focused
 
         world.update(static_cast<double>(dt));
         
